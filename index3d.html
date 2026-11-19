@@ -55,7 +55,10 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
 #game #lv{right:12px}#game #left{left:12px}
 .nv{position:absolute;z-index:20;width:48px;height:48px;border-radius:50%;background:var(--card);font-size:1.2rem;font-weight:900;box-shadow:0 4px 0 rgba(0,0,0,.2);opacity:.9}
 #mt{right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 14px)}
-#nl{left:10px;top:50%}#nr{right:10px;top:50%}#nb{left:50%;margin-left:-24px;bottom:calc(env(safe-area-inset-bottom,0px) + 14px)}
+#nl{left:10px;top:42%}#nr{right:10px;top:42%}
+#dp{left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);width:auto;padding:0 20px;border-radius:99px;font-size:1rem}
+#joy{position:absolute;z-index:20;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 76px);width:130px;height:130px;border-radius:50%;background:var(--card);opacity:.6;touch-action:none;box-shadow:0 4px 0 rgba(0,0,0,.18)}
+#joy i{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:var(--teal);box-shadow:0 3px 0 rgba(0,0,0,.2);pointer-events:none}
 #tp{position:absolute;z-index:20;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 74px);background:var(--card);padding:6px 14px;border-radius:99px;font-weight:700;pointer-events:none;width:max-content;max-width:calc(100% - 24px);text-align:center;box-sizing:border-box;animation:tpf 7s forwards}
 @keyframes tpf{0%,75%{opacity:1}100%{opacity:0}}
 .say{transition:opacity .25s,transform .25s}.say.sh2{animation:sayin .3s}@keyframes sayin{from{opacity:0;transform:translateY(-8px)}}
@@ -73,9 +76,10 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
     <div class="top"><button class="back" id="back" aria-label="رجوع"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button><div class="pb" id="lv"><i></i><span></span></div><div class="pb" id="left"><i></i><span></span></div></div>
     <div class="bar" id="bar" hidden><i></i></div>
     <div class="say" id="say" hidden aria-live="polite"><span class="bot">🤖</span><p id="sayt"></p></div>
-    <button class="nv" id="nl" aria-label="دوران لليسار">◀</button><button class="nv" id="nr" aria-label="دوران لليمين">▶</button><button class="nv" id="nb" aria-label="استدارة للخلف">⟲</button><button class="nv" id="mt" aria-label="كتم الصوت">🔊</button>
-    <div id="tp">اسحب الغرض إلى مكانه، أو اضغطه ثم اضغط المكان. اسحب الغرفة للدوران 360°</div>
+    <button class="nv" id="nl" aria-label="دوران لليسار">◀</button><button class="nv" id="nr" aria-label="دوران لليمين">▶</button><button class="nv" id="dp" hidden>✋ اترك الغرض</button><button class="nv" id="mt" aria-label="كتم الصوت">🔊</button>
+    <div id="tp">تحرّك بالعصا، واسحب الشاشة للنظر. اضغط غرضًا عليه حلقة ذهبية لتمسكه، ثم اذهب به واضغط مكانه</div>
     <div id="room"></div>
+    <div id="joy" aria-label="عصا الحركة"><i></i></div>
   </section>
 
   <div class="ov" id="res" hidden><div class="box">
@@ -248,17 +252,25 @@ const MK={
 "🍴":()=>{const g=new THREE.Group();[-1,1].forEach(i=>{g.add(R3(cy(.006,.008,.16,MET(),i*.03,.008,0,8),Math.PI/2,0,0));const h=sp(.022,MET(),i*.03,.01,-.1);h.scale.set(1,.35,1.4);g.add(h)});return g},
 "☕":()=>Gp(cy(.08,.08,.01,W0(),0,.005,0,24),cy(.055,.04,.09,W0(),0,.055,0),cy(.05,.05,.004,M(0x5b3a21,.5),0,.098,0),R3(tor(.03,.008,Math.PI,W0(),.062,.06,0),0,0,-Math.PI/2))
 };
-function mkItem(e,k){const g=new THREE.Group();g.add((MK[e]||MK["📄"])());const hs=new THREE.Mesh(new THREE.SphereGeometry(.2,10,8),hidMat());hs.position.y=.12;g.add(hs);g.userData={k,e,placed:false};return g}
+function mkItem(e,k){const g=new THREE.Group();g.add((MK[e]||MK["📄"])());const hs=new THREE.Mesh(new THREE.SphereGeometry(.2,10,8),hidMat());hs.position.y=.12;g.add(hs);const rg=new THREE.Mesh(new THREE.RingGeometry(.2,.25,28),new THREE.MeshBasicMaterial({color:0xffc93c,transparent:true,opacity:.9,side:THREE.DoubleSide,depthWrite:false}));rg.rotation.x=-Math.PI/2;rg.position.y=.012;rg.visible=false;g.add(rg);g.userData={k,e,placed:false,rg};return g}
+
+/* ============ اليد ============ */
+const hand=new THREE.Group(),HIDLE=new THREE.Vector3(.3,-.34,-.6),HCARRY=new THREE.Vector3(.17,-.28,-.5);
+{const skin=M(0xf2c7a0,.8),slv=M(0x1fb5a5,.8);
+ hand.add(bx(.09,.035,.09,skin,0,0,0),bx(.1,.1,.06,W0(),0,0,.08),bx(.085,.085,3.2,slv,0,0,1.7),R3(bx(.022,.022,.065,skin,-.06,0,-.03),0,.7,0));
+ for(let i=0;i<4;i++)hand.add(bx(.018,.02,.075,skin,-.03+i*.02,0,-.075));
+ hand.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false}});
+ hand.position.copy(HIDLE);hand.rotation.set(-.1,.1,0);cam.add(hand);scene.add(cam)}
 
 /* ============ بناء الغرفة ============ */
 let roomG=null,ZN={},zoneHits=[];
 const itemsG=new THREE.Group();scene.add(itemsG);
 function disposeG(g){g.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)[].concat(o.material).forEach(m=>{if(m.map&&!shared.has(m.map))m.map.dispose();m.dispose()})})}
 function mkZone(k,f,x,z,ry){
- const o=f(),g=o.g;g.position.set(x,0,z);g.rotation.y=ry;g.updateMatrixWorld(true);
+ const o=f(),g=o.g;g.position.set(x,0,z);g.rotation.y=ry;g.updateMatrixWorld(true);const fp=new THREE.Box3().setFromObject(g);
  const hb=new THREE.Mesh(new THREE.BoxGeometry(...o.hit),hidMat());hb.position.set(0,o.hit[1]/2,o.hz||0);hb.userData.k=k;g.add(hb);
  g.add(label(Z[k].n,o.lab));
- const zn={k,g,hb,slots:o.slots.map(s=>g.localToWorld(new THREE.Vector3(...s))),anim:o.anim||null,open:0,n:0,over:false,hintT:0,mats:[],_ei:0};
+ const zn={k,fp,g,hb,slots:o.slots.map(s=>g.localToWorld(new THREE.Vector3(...s))),anim:o.anim||null,open:0,n:0,over:false,hintT:0,mats:[],_ei:0};
  g.traverse(c=>{if(c.isMesh&&c!==hb&&c.material.emissive)zn.mats.push(c.material)});
  roomG.add(g);ZN[k]=zn;zoneHits.push(hb)}
 function buildRoom(zs){
@@ -299,7 +311,7 @@ function buildRoom(zs){
 
 /* ============ الحالة والتحكم ============ */
 let mode,lvl,mistakes,left,timer,end,total,over=false,ac,streak=0,hl=0,sel=null,muted=false,sayT=0,pausedRem=null;
-let yaw=0,tgtYaw=0,pitch=-.28,edge=0;
+let yaw=0,tgtYaw=0,pitch=-.28;const P={x:0,z:0};
 const fall=new Set(),tw=[];
 const tween=(dur,fn,done)=>tw.push({t:0,dur,fn,done});
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -334,18 +346,15 @@ document.addEventListener("visibilitychange",()=>{
  if(document.hidden){clearInterval(timer);pausedRem=end-Date.now()}
  else if(pausedRem!==null){end=Date.now()+pausedRem;pausedRem=null;timer=setInterval(timerTick,100);say("تابع من حيث توقفت!")}});
 
-/* حلقة التحديد */
-const ring=new THREE.Mesh(new THREE.RingGeometry(.2,.27,32),new THREE.MeshBasicMaterial({color:0xffc93c,transparent:true,opacity:.9,side:THREE.DoubleSide,depthWrite:false}));
-ring.rotation.x=-Math.PI/2;ring.visible=false;ring.renderOrder=3;scene.add(ring);
-
 function start(m,l){
- mode=m;lvl=l;mistakes=0;over=false;clearInterval(timer);pausedRem=null;streak=0;clearSel();fall.clear();tw.length=0;drag=null;edge=0;
+ mode=m;lvl=l;mistakes=0;over=false;clearInterval(timer);pausedRem=null;streak=0;fall.clear();tw.length=0;carry=null;busy=false;reaching=false;
  const cfg=L[l];total=left=cfg.n;show("game");fit();hl=l;hud();
  $("bar").hidden=m!=="time";
  say(m==="time"?"هيا بسرعة! الصواب يزيد الوقت، والخطأ يخصم 3 ثوانٍ.":"اسحب كل غرض إلى مكانه الصحيح. خذ وقتك!");
  buildRoom(cfg.z);
  while(itemsG.children.length){const c=itemsG.children[0];itemsG.remove(c);disposeG(c)}
- yaw=tgtYaw=0;pitch=-.28;
+ [...hand.children].forEach(c=>{if(c.userData&&c.userData.k){hand.remove(c);disposeG(c)}});hand.position.copy(HIDLE);$("dp").hidden=true;dpShown=false;
+ yaw=tgtYaw=0;pitch=-.28;P.x=0;P.z=0;
  const pools={};cfg.z.forEach(k=>pools[k]=shuffle(Z[k].items));
  const off=Math.random()*Math.PI*2;
  for(let i=0;i<cfg.n;i++){
@@ -355,55 +364,91 @@ function start(m,l){
  if(m==="time"){end=Date.now()+cfg.t*1000;timer=setInterval(timerTick,100)}
 }
 
-/* ============ اللمس والسحب ============ */
-const rc=new THREE.Raycaster(),dirV=new THREE.Vector3(),tmpA=new THREE.Vector3(),tmpB=new THREE.Vector3(),dragPlane=new THREE.Plane();
-let drag=null,dragDist=1.5,dStart={x:0,y:0},lastP={x:0,y:0},moved=false,rotP=null,vel=0;
+/* ============ الحركة واليد والحمل ============ */
+const REACH=1.5,ZREACH=1.9,PR=.28;
+const rc=new THREE.Raycaster(),tmpA=new THREE.Vector3(),tmpB=new THREE.Vector3(),floorPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
+let carry=null,busy=false,reaching=false,jx=0,jy=0,rotP=null,dStart={x:0,y:0},walkT=0;
+const K={};
+const distTo=(x,z)=>Math.hypot(x-P.x,z-P.z);
 const ndcOf=(x,y)=>{const r=cv.getBoundingClientRect();return new THREE.Vector2((x-r.left)/r.width*2-1,-((y-r.top)/r.height*2-1))};
 function pickItem(x,y){rc.setFromCamera(ndcOf(x,y),cam);
  const h=rc.intersectObjects(itemsG.children.filter(i=>!i.userData.placed),true)[0];if(!h)return null;
  let o=h.object;while(o.parent&&o.parent!==itemsG)o=o.parent;return o}
 function zoneAt(x,y){rc.setFromCamera(ndcOf(x,y),cam);const h=rc.intersectObjects(zoneHits,false)[0];return h?ZN[h.object.userData.k]:null}
-const setOver=z=>{for(const k in ZN)ZN[k].over=ZN[k]===z};
+/* يبقي النقطة داخل الغرفة وخارج مساحة الأثاث */
+function pushOut(p,r){const lim=R-.35;p.x=clamp(p.x,-lim,lim);p.z=clamp(p.z,-lim,lim);
+ for(const k in ZN){const b=ZN[k].fp,x0=b.min.x-r,x1=b.max.x+r,z0=b.min.z-r,z1=b.max.z+r;
+  if(p.x>x0&&p.x<x1&&p.z>z0&&p.z<z1){const dl=p.x-x0,dr=x1-p.x,dt=p.z-z0,db=z1-p.z,m=Math.min(dl,dr,dt,db);
+   if(m===dl)p.x=x0;else if(m===dr)p.x=x1;else if(m===dt)p.z=z0;else p.z=z1}}}
 
-cv.addEventListener("pointerdown",e=>{
- if(over)return;cv.setPointerCapture(e.pointerId);
- dStart={x:e.clientX,y:e.clientY};lastP={x:e.clientX,y:e.clientY};moved=false;vel=0;
- const it=pickItem(e.clientX,e.clientY);
- if(it){drag=it;const u=it.userData;u.home=it.position.clone();u.homeRot=it.rotation.clone();fall.delete(it);
-  cam.updateMatrixWorld();cam.getWorldDirection(dirV);dragDist=Math.max(.9,tmpA.copy(it.position).sub(cam.position).dot(dirV));
-  it.scale.setScalar(1.25);snd(520,.06)}
- else rotP={x:e.clientX,y:e.clientY};
-});
-cv.addEventListener("pointermove",e=>{
- if(drag){vel=vel*.6+(e.clientX-lastP.x)*.9;lastP={x:e.clientX,y:e.clientY};
-  if(Math.hypot(e.clientX-dStart.x,e.clientY-dStart.y)>8)moved=true;
-  const r=cv.getBoundingClientRect();edge=moved?(e.clientX<r.left+60?1:e.clientX>r.right-60?-1:0):0;
-  setOver(zoneAt(e.clientX,e.clientY-34))}
- else if(rotP){tgtYaw+=(e.clientX-rotP.x)*.006;pitch=clamp(pitch+(e.clientY-rotP.y)*.004,-.55,.05);yaw=tgtYaw;rotP={x:e.clientX,y:e.clientY}}
-});
-const up=e=>{
- if(drag){const it=drag;drag=null;edge=0;const u=it.userData,tap=!moved&&e.type==="pointerup";
-  const z=(e.type==="pointerup"&&moved)?zoneAt(e.clientX,e.clientY-34):null;setOver(null);
-  if(tap){it.position.copy(u.home);it.rotation.copy(u.homeRot);it.scale.setScalar(1);toggleSel(it);return}
-  if(z&&z.k===u.k)correct(it,z);else if(z)wrong(it);else dropFloor(it)}
- else if(rotP){const tap=Math.hypot(e.clientX-rotP.x,e.clientY-rotP.y)<8&&Math.hypot(e.clientX-dStart.x,e.clientY-dStart.y)<8;rotP=null;
-  if(tap&&sel&&e.type==="pointerup")dropSel(zoneAt(e.clientX,e.clientY))}
-};
-cv.addEventListener("pointerup",up);cv.addEventListener("pointercancel",up);
+/* مدّ اليد نحو نقطة في العالم ثم تنفيذ الدالة عند الوصول */
+function reach(wp,dur,cb){busy=true;reaching=true;cam.updateMatrixWorld();
+ const a=hand.position.clone(),b=cam.worldToLocal(wp.clone());b.z+=.12;
+ tween(dur,t=>{const e=t*t*(3-2*t);hand.position.lerpVectors(a,b,e)},()=>{cb&&cb()})}
+function retreat(pose,cb){const h0=hand.position.clone();
+ tween(.25,t=>hand.position.lerpVectors(h0,pose,t),()=>{reaching=false;busy=false;cb&&cb()})}
 
-function clearSel(){sel=null;ring.visible=false}
-function select(it,kb){clearSel();sel=it;const u=it.userData;u.home=it.position.clone();u.homeRot=it.rotation.clone();ring.visible=true;snd(620,.06);
- const zs=L[lvl].z;say((NM[u.e]||"الغرض")+(kb?": اختر رقم المكان — "+zs.map((k,i)=>(i+1)+" "+Z[k].n).join("، "):": اضغط على مكانه الصحيح"))}
-function toggleSel(it){if(sel===it){clearSel();say("");return}select(it,false)}
-function dropSel(z){const it=sel;if(!it||over)return;clearSel();
- if(z&&z.k===it.userData.k)correct(it,z);else if(z)wrong(it);else say("")}
-function nextItem(){const rem=itemsG.children.filter(i=>!i.userData.placed);if(!rem.length)return;const i=rem.indexOf(sel),it=rem[(i+1)%rem.length];select(it,true);faceItem(it)}
+function tryGrab(it){
+ if(busy||over)return;
+ const u=it.userData;
+ if(carry){say("أنت تحمل غرضًا. ضعه في مكانه أولًا، أو اتركه.");return}
+ if(distTo(it.position.x,it.position.z)>REACH){say("اقترب من "+(NM[u.e]||"الغرض")+" لتمسكه");return}
+ fall.delete(it);snd(520,.06);
+ reach(new THREE.Vector3(it.position.x,it.position.y+.1,it.position.z),.28,()=>{
+  hand.attach(it);carry=it;u.rg.visible=false;
+  const p0=it.position.clone(),p1=new THREE.Vector3(0,.045,-.15),q0=it.quaternion.clone(),q1=new THREE.Quaternion().setFromEuler(new THREE.Euler(0,.4,0));
+  tween(.22,t=>{it.position.lerpVectors(p0,p1,t);it.quaternion.slerpQuaternions(q0,q1,t)});
+  retreat(HCARRY);
+  say((NM[u.e]||"الغرض")+" في يدك. اذهب به إلى مكانه واضغط عليه.")})}
 
-function dropFloor(it){
- const p=it.position;let r=Math.hypot(p.x,p.z);
- if(r<.8){const a=Math.atan2(p.x,-p.z);p.x=Math.sin(a)*.8;p.z=-Math.cos(a)*.8;r=.8}
- const mx=R-.5;if(r>mx){p.x*=mx/r;p.z*=mx/r}
- it.scale.setScalar(1);it.userData.vy=0;fall.add(it)}
+function tryPlace(z){
+ if(busy||over||!carry)return;
+ if(distTo(z.g.position.x,z.g.position.z)>ZREACH){say("اقترب من "+Z[z.k].n+" أكثر");z.hintT=.6;return}
+ const it=carry,slot=z.slots[z.n%z.slots.length].clone();
+ if(it.userData.k!==z.k){reach(slot,.3,()=>wrong(it,z));return}
+ reach(slot,.32,()=>{itemsG.attach(it);carry=null;correct(it,z);retreat(HIDLE)})}
+
+function tryDrop(wp){
+ if(busy||over||!carry)return;
+ const it=carry;let x,z;
+ if(wp&&distTo(wp.x,wp.z)<=ZREACH){x=wp.x;z=wp.z}else{x=P.x-Math.sin(yaw)*1.0;z=P.z-Math.cos(yaw)*1.0}
+ const q={x,z};pushOut(q,.15);
+ reach(new THREE.Vector3(q.x,.25,q.z),.3,()=>{
+  itemsG.attach(it);carry=null;it.userData.vy=0;fall.add(it);
+  const x0=it.position.x,z0=it.position.z;tween(.3,t=>{it.position.x=x0+(q.x-x0)*t;it.position.z=z0+(q.z-z0)*t});
+  retreat(HIDLE);say("")})}
+
+function tapAt(x,y){
+ if(over||busy)return;
+ const it=pickItem(x,y);if(it){tryGrab(it);return}
+ const z=zoneAt(x,y);
+ if(z){if(carry)tryPlace(z);else say("احمل غرضًا أولًا، ثم اضغط على "+Z[z.k].n);return}
+ if(carry){rc.setFromCamera(ndcOf(x,y),cam);const h=rc.ray.intersectPlane(floorPlane,tmpB);tryDrop(h?tmpB.clone():null)}}
+
+function interact(){
+ if(busy||over)return;
+ const fx=-Math.sin(yaw),fz=-Math.cos(yaw);let best=null,bd=99;
+ if(!carry){
+  itemsG.children.forEach(it=>{if(it.userData.placed)return;const dx=it.position.x-P.x,dz=it.position.z-P.z,d=Math.hypot(dx,dz);if(d<=REACH&&(dx*fx+dz*fz)/Math.max(d,.01)>.4&&d<bd){bd=d;best=it}});
+  if(best)tryGrab(best);else say("لا يوجد غرض قريب أمامك");return}
+ let bz=null;
+ for(const k in ZN){const z=ZN[k],dx=z.g.position.x-P.x,dz=z.g.position.z-P.z,d=Math.hypot(dx,dz);if(d<=ZREACH&&(dx*fx+dz*fz)/Math.max(d,.01)>.4&&d<bd){bd=d;bz=z}}
+ if(bz)tryPlace(bz);else tryDrop(null)}
+
+/* النظر بالسحب، والنقر للإمساك والوضع */
+cv.addEventListener("pointerdown",e=>{if(over)return;cv.setPointerCapture(e.pointerId);dStart={x:e.clientX,y:e.clientY};rotP={x:e.clientX,y:e.clientY}});
+cv.addEventListener("pointermove",e=>{if(!rotP)return;tgtYaw+=(e.clientX-rotP.x)*.006;pitch=clamp(pitch+(e.clientY-rotP.y)*.004,-1,.45);yaw=tgtYaw;rotP={x:e.clientX,y:e.clientY}});
+const upc=e=>{if(!rotP)return;rotP=null;if(e.type==="pointerup"&&Math.hypot(e.clientX-dStart.x,e.clientY-dStart.y)<10)tapAt(e.clientX,e.clientY)};
+cv.addEventListener("pointerup",upc);cv.addEventListener("pointercancel",upc);
+
+/* عصا الحركة */
+const joy=$("joy"),knob=joy.firstElementChild;let jid=null;
+const jset=e=>{const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,lim=r.width/2-24;let dx=e.clientX-cx,dy=e.clientY-cy;const m=Math.hypot(dx,dy);if(m>lim){dx*=lim/m;dy*=lim/m}
+ knob.style.transform=`translate(${dx}px,${dy}px)`;jx=Math.abs(dx/lim)<.12?0:dx/lim;jy=Math.abs(dy/lim)<.12?0:-dy/lim};
+joy.addEventListener("pointerdown",e=>{jid=e.pointerId;joy.setPointerCapture(jid);jset(e)});
+joy.addEventListener("pointermove",e=>{if(e.pointerId===jid)jset(e)});
+const jend=e=>{if(e.pointerId!==jid)return;jid=null;jx=jy=0;knob.style.transform=""};
+joy.addEventListener("pointerup",jend);joy.addEventListener("pointercancel",jend);
 
 function starAt(z){const v=tmpB.copy(z.g.position);v.y=1.2;v.project(cam);
  const s=document.createElement("div");s.className="star";s.textContent="⭐";
@@ -415,19 +460,18 @@ function correct(it,z){
  tween(.6,t=>{const e=1-Math.pow(1-t,3);it.position.lerpVectors(p0,p1,e);it.position.y+=Math.sin(Math.PI*t)*.35;it.scale.setScalar(s0+(1-s0)*e);it.rotation.set(r0.x*(1-e),r0.y+(ry-r0.y)*e,r0.z*(1-e))},()=>it.position.copy(p1));
  tween(.35,t=>z.g.scale.setScalar(1+.04*Math.sin(Math.PI*t)),()=>z.g.scale.setScalar(1));
  starAt(z);sfx(z.k);setTimeout(()=>snd(880,.1),130);
- if(sel===it)clearSel();
  left--;hud();
  if(left===0){say("");setTimeout(()=>finish(true),700)}
  else if(mode==="time"){streak++;const b=streak>=3?3:2;end=Math.min(end+b*1000,Date.now()+L[lvl].t*1000);say("+"+b+" ثوانٍ ⏱️"+(streak>=3?"  تتابع ×"+streak+" 🔥":""))}
  else say(PRAISE[Math.floor(Math.random()*PRAISE.length)]);
 }
-function wrong(it){
+function wrong(it,z){
  const u=it.userData;mistakes++;snd(220,.2);
- const p0=it.position.clone(),p1=(u.home||it.position).clone();p1.y=0;
- tween(.45,t=>{it.position.lerpVectors(p0,p1,t);it.position.y+=Math.sin(Math.PI*t)*.3;it.scale.setScalar(1.25-.25*t);it.rotation.z=Math.sin(t*20)*.3*(1-t)},()=>{it.position.copy(p1);it.rotation.z=0});
  let pen="";if(mode==="time"){streak=0;end-=3000;pen="  −3 ثوانٍ ⏱️"}
  say((NM[u.e]||"هذا الغرض")+" ليس هنا. "+WHY[u.k]+pen);
- if(mode==="relax"){const z=ZN[u.k];setTimeout(()=>face(u.k),300);if(z)setTimeout(()=>{z.hintT=1.1},900)}
+ if(mode==="relax"&&ZN[u.k])setTimeout(()=>{ZN[u.k].hintT=1.4},500);
+ const h0=hand.position.clone();
+ tween(.4,t=>{hand.position.copy(h0);hand.position.x+=Math.sin(t*24)*.05*(1-t)},()=>retreat(HCARRY));
 }
 
 function finish(win){
@@ -441,26 +485,28 @@ function finish(win){
 }
 
 /* ============ حلقة الرسم ============ */
-let last=performance.now();
+let last=performance.now(),dpShown=false;
 function frame(now){
  const dt=Math.min(.05,(now-last)/1000),t=now/1000;last=now;
  if(!$("game").hidden){
-  if(edge)tgtYaw+=edge*dt*1.8;
+  let mx=jx,my=jy;if(K.w||K.arrowup)my+=1;if(K.s||K.arrowdown)my-=1;if(K.d)mx+=1;if(K.a)mx-=1;
+  if(K.arrowleft)tgtYaw+=dt*1.8;if(K.arrowright)tgtYaw-=dt*1.8;
   yaw+=(tgtYaw-yaw)*Math.min(1,dt*10);
-  cam.rotation.set(pitch,yaw,0);cam.updateMatrixWorld();
-  if(drag){
-   cam.getWorldDirection(dirV);dragPlane.setFromNormalAndCoplanarPoint(dirV,tmpA.copy(cam.position).addScaledVector(dirV,dragDist));
-   rc.setFromCamera(ndcOf(lastP.x,lastP.y-34),cam);
-   if(rc.ray.intersectPlane(dragPlane,tmpB)){tmpB.x=clamp(tmpB.x,-(R-.45),R-.45);tmpB.z=clamp(tmpB.z,-(R-.45),R-.45);tmpB.y=clamp(tmpB.y,.15,2.6);drag.position.lerp(tmpB,Math.min(1,dt*22))}
-   drag.rotation.z+=(clamp(-vel*.02,-.5,.5)-drag.rotation.z)*.2;
-  }
+  const ml=Math.hypot(mx,my);if(ml>1){mx/=ml;my/=ml}
+  if(ml>.01&&!over){const f=2*dt,fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw);
+   P.x+=(fx*my+rx*mx)*f;P.z+=(fz*my+rz*mx)*f;pushOut(P,PR);walkT+=dt*Math.min(1,ml)}
+  cam.position.set(P.x,1.45+(ml>.01?Math.sin(walkT*9)*.012:0),P.z);cam.rotation.set(pitch,yaw,0);cam.updateMatrixWorld();
+  if(!reaching)hand.position.lerp(carry?HCARRY:HIDLE,Math.min(1,dt*8));
   for(let i=tw.length-1;i>=0;i--){const a=tw[i];a.t+=dt;const u=Math.min(1,a.t/a.dur);a.fn(u);if(u>=1){tw.splice(i,1);a.done&&a.done()}}
   for(const it of fall){const u=it.userData;u.vy-=14*dt;it.position.y+=u.vy*dt;it.rotation.x*=.9;it.rotation.z*=.9;
    if(it.position.y<=0){it.position.y=0;if(Math.abs(u.vy)>1.2)u.vy=-u.vy*.32;else{u.vy=0;fall.delete(it)}}}
-  for(const k in ZN){const z=ZN[k];z.open+=(((z.over||z.n>0)?1:0)-z.open)*Math.min(1,dt*7);if(z.anim)z.anim(z.open);
-   let ei=0,ec=0xffc93c;if(z.hintT>0){z.hintT-=dt;ec=0xff5d73;ei=.25+.3*Math.sin(t*16)}else if(z.over)ei=.35;
+  for(const k in ZN){const z=ZN[k],near=!!carry&&distTo(z.g.position.x,z.g.position.z)<=ZREACH;
+   z.open+=(((near||z.n>0)?1:0)-z.open)*Math.min(1,dt*7);if(z.anim)z.anim(z.open);
+   let ei=0,ec=0xffc93c;if(z.hintT>0){z.hintT-=dt;ec=0xff5d73;ei=.25+.3*Math.sin(t*16)}else if(near)ei=.18;
    if(ei!==z._ei||z.hintT>0){z.mats.forEach(m=>{m.emissive.setHex(ec);m.emissiveIntensity=ei});z._ei=ei}}
-  if(ring.visible&&sel){ring.position.set(sel.position.x,.015,sel.position.z);ring.scale.setScalar(1+.08*Math.sin(t*6))}
+  itemsG.children.forEach(it=>{const u=it.userData;if(!u.rg)return;
+   const on=!u.placed&&!carry&&it.position.y<.3&&distTo(it.position.x,it.position.z)<=REACH;u.rg.visible=on;if(on)u.rg.scale.setScalar(1+.08*Math.sin(t*6))});
+  const sd=!!carry&&!busy;if(sd!==dpShown){$("dp").hidden=!sd;dpShown=sd}
   renderer.render(scene,cam);
  }
  requestAnimationFrame(frame);
@@ -475,14 +521,15 @@ $("m1").onclick=()=>start("relax",0);
 $("m2").onclick=()=>start("time",0);
 $("b2").onclick=()=>{clearInterval(timer);show("home")};
 $("back").onclick=()=>{clearInterval(timer);over=true;show("home")};
-$("nl").onclick=()=>turn(90);$("nr").onclick=()=>turn(-90);$("nb").onclick=()=>turn(180);
+$("nl").onclick=()=>turn(90);$("nr").onclick=()=>turn(-90);$("dp").onclick=()=>tryDrop(null);
 addEventListener("keydown",e=>{
  if($("game").hidden||!$("res").hidden)return;
- const a=document.activeElement;
- if(e.key==="Tab"&&!e.shiftKey&&(a===document.body||a===cv)){e.preventDefault();nextItem();return}
- if(sel&&/^[1-5]$/.test(e.key)){const k=L[lvl].z[+e.key-1],z=k&&ZN[k];if(z){e.preventDefault();dropSel(z)}return}
- if(e.key==="Escape"&&sel){clearSel();say("");return}
- if(e.key==="ArrowLeft")turn(90);else if(e.key==="ArrowRight")turn(-90);else if(e.key==="ArrowDown")turn(180)});
+ const k=e.key.toLowerCase();
+ if(["w","a","s","d","arrowup","arrowdown","arrowleft","arrowright"].includes(k)){K[k]=1;e.preventDefault();return}
+ if((k==="e"||k==="enter"||k===" ")&&document.activeElement.tagName!=="BUTTON"){e.preventDefault();interact();return}
+ if(k==="q"&&carry)tryDrop(null)});
+addEventListener("keyup",e=>{delete K[e.key.toLowerCase()]});
+addEventListener("blur",()=>{for(const k in K)delete K[k]});
 </script>
 </body>
 </html>
