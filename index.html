@@ -462,28 +462,36 @@ let pYaw=0,pYawT=0,post=0,postT=0,aw=0,cheerT=0,shakeV=0,hopV=0,mv=0,walkPh=0,lp
 const wrapA=a=>Math.atan2(Math.sin(a),Math.cos(a)),UPV=new THREE.Vector3(0,1,0);
 const torsoG=new THREE.Group(),headG=new THREE.Group();
 let LEGS,ARMS;
-{const skinM=M(0xf1c4a0,.6),shirtM=M(0x1fb5a5,.8),whiteM=M(0xffffff,.8),jeansM=M(0x3d5a98,.85),shoeM=M(0xe0574a,.7),hairM=M(0x3a2418,.7),eyeM=M(0x2a1a12,.5),pinkM=M(0xff9a9a,.9),noseM=M(0xe0a283,.7),mouthM=M(0x8a2f2f,.6);
+{const skinM=M(0xe9b48a,.6),shirtM=M(0x9cc8ee,.8),whiteM=M(0xffffff,.8),pantsM=M(0x4a4f5c,.85),cuffM=M(0x3a3e4a,.85),shoeM=M(0x5b82b5,.7),hairM=M(0x1c1a22,.7),browM=M(0x4a2a1c,.5),inkM=M(0x1c1a22,.5),pinkM=M(0xf08a7a,.9),noseM=M(0xd99a76,.7),mouthM=M(0x8a3f35,.6),redM=M(0xe0574a,.6),orgM=M(0xffa63c,.6),blueM=M(0x3d8fd1,.6);
  skinM.emissive.setHex(0x2a0d05);skinM.emissiveIntensity=.15;
- /* الجذع: بنطلون قصير ثم قميص بخط أبيض وعنق */
- torsoG.add(rbox(.38,.14,.25,.06,jeansM,0,.06,0),rbox(.42,.36,.25,.09,shirtM,0,.28,0),rbox(.425,.05,.255,.02,whiteM,0,.27,0),cy(.05,.055,.09,skinM,0,.47,0,14));
- /* الرأس: يتّجه وجهه نحو -z */
+ /* الجذع: بنطلون رمادي بخيطين، وقميص أزرق فاتح عليه صاروخ، وعنق */
+ torsoG.add(rbox(.38,.14,.25,.06,pantsM,0,.06,0),rbox(.42,.36,.25,.09,shirtM,0,.28,0),cy(.05,.055,.09,skinM,0,.47,0,14));
+ torsoG.add(el(.012,.03,.008,inkM,-.025,.04,-.128),el(.012,.03,.008,inkM,.025,.04,-.128));
+ const rk=new THREE.Group();rk.position.set(0,.3,-.13);rk.rotation.z=-.7;
+ rk.add(el(.02,.042,.01,whiteM,0,0,0),el(.014,.02,.011,redM,0,.04,0),sp(.009,blueM,0,.008,-.008),el(.012,.022,.008,orgM,0,-.055,0),el(.012,.01,.012,redM,-.017,-.025,0),el(.012,.01,.012,redM,.017,-.025,0));
+ torsoG.add(rk);
+ /* الرأس: يتّجه وجهه نحو -z، بأذنين بارزتين وعينين بنيّتين كبيرتين */
  headG.position.set(0,.5,0);
- headG.add(el(.205,.2,.2,skinM,0,.17,0),el(.045,.055,.04,skinM,-.2,.17,0),el(.045,.055,.04,skinM,.2,.17,0),el(.02,.018,.02,noseM,0,.15,-.198));
- [-1,1].forEach(s=>headG.add(el(.03,.045,.022,eyeM,s*.075,.185,-.175),sp(.011,whiteM,s*.08,.2,-.193),el(.034,.02,.012,pinkM,s*.125,.12,-.15),R3(el(.04,.009,.01,hairM,s*.075,.235,-.168),0,0,-s*.2)));
+ headG.add(el(.21,.205,.2,skinM,0,.17,0),el(.05,.062,.04,skinM,-.205,.17,0),el(.05,.062,.04,skinM,.205,.17,0),el(.022,.02,.022,noseM,0,.145,-.2));
+ [-1,1].forEach(s=>headG.add(el(.033,.045,.022,browM,s*.075,.185,-.176),sp(.012,whiteM,s*.082,.2,-.194),el(.036,.021,.012,pinkM,s*.13,.115,-.15),R3(el(.042,.011,.01,inkM,s*.078,.243,-.168),0,0,-s*.12)));
  const smile=tor(.04,.008,Math.PI,mouthM,0,.115,-.19);smile.rotation.z=Math.PI;headG.add(smile);
- const cap=sh(new THREE.Mesh(new THREE.SphereGeometry(.222,28,16,0,Math.PI*2,0,Math.PI*.5),hairM));cap.position.set(0,.17,0);cap.rotation.x=.6;headG.add(cap);
- const tuft=sh(new THREE.Mesh(new THREE.ConeGeometry(.045,.13,6),hairM));tuft.position.set(0,.4,.1);tuft.rotation.x=.6;headG.add(tuft);
- headG.add(el(.12,.045,.05,hairM,0,.295,-.15));
+ /* شعر أسود مجعّد: قبعة تغطي الجزء الخلفي، وكرات صغيرة تشكّل الخصلات */
+ const cap=sh(new THREE.Mesh(new THREE.SphereGeometry(.212,28,16,0,Math.PI*2,0,Math.PI*.5),hairM));cap.position.set(0,.17,0);cap.rotation.x=.6;headG.add(cap);
+ for(const [th,n] of [[0,1],[.45,6],[.75,9],[1.15,11]])for(let i=0;i<n;i++){const ph=i*Math.PI*2/n+th*1.3;
+  if(th>.9&&Math.abs(wrapA(ph-Math.PI))<1.15)continue;
+  const j=Math.sin(i*12.9+th*7.3),r=.055+.012*Math.abs(j),d=.2+.012*j;
+  headG.add(sp(r,hairM,Math.sin(th)*Math.sin(ph)*d,.17+Math.cos(th)*d*.98,Math.sin(th)*Math.cos(ph)*d))}
  torsoG.add(headG);player.add(torsoG);
- /* الساقان: فخذ فركبة فساق فحذاء */
+ /* الساقان: بنطلون مثني الأطراف، جوارب بيضاء، حذاء أزرق بنعل أبيض */
  LEGS=[1,-1].map(s=>{const hip=new THREE.Group(),knee=new THREE.Group(),foot=new THREE.Group();hip.position.x=s*.1;
-  hip.add(cy(.07,.06,PL.t1,jeansM,0,-PL.t1/2,0,14),sp(.066,jeansM,0,0,0));
-  knee.position.y=-PL.t1;hip.add(knee);knee.add(sp(.06,jeansM,0,0,0),cy(.058,.05,PL.s1,jeansM,0,-PL.s1/2,0,14));
+  hip.add(cy(.07,.062,PL.t1,pantsM,0,-PL.t1/2,0,14),sp(.066,pantsM,0,0,0));
+  knee.position.y=-PL.t1;hip.add(knee);
+  knee.add(sp(.062,pantsM,0,0,0),cy(.06,.055,.2,pantsM,0,-.1,0,14),cy(.066,.066,.045,cuffM,0,-.2,0,14),cy(.045,.043,.12,whiteM,0,-.26,0,12));
   foot.position.y=-PL.s1;knee.add(foot);
-  foot.add(rbox(.13,.09,.27,.04,shoeM,0,-.005,-.045),rbox(.136,.03,.28,.012,whiteM,0,-.045,-.045));
+  foot.add(rbox(.13,.09,.27,.04,shoeM,0,-.005,-.045),rbox(.136,.03,.28,.012,whiteM,0,-.045,-.045),bx(.007,.035,.11,whiteM,.066,0,-.03,),bx(.007,.035,.11,whiteM,-.066,0,-.03),el(.04,.01,.05,whiteM,0,.04,-.08));
   player.add(hip);return{hip,knee,foot,s}});
- /* الذراعان: قطعتان بطولين ثابتين، تُوضعان كل إطار بمعادلة مفصل الكوع */
- ARMS=[1,-1].map(s=>{const A={s,up:cy(.056,.05,PL.ua,shirtM,0,0,0,14),fo:cy(.047,.042,PL.fa,skinM,0,0,0,14),jt:sp(.05,shirtM,0,0,0),ha:el(.062,.06,.064,skinM,0,0,0),sd:sp(.07,shirtM,0,0,0)};player.add(A.up,A.fo,A.jt,A.ha,A.sd);return A});
+ /* الذراعان: كمّ قصير أزرق وساعد بلون البشرة */
+ ARMS=[1,-1].map(s=>{const A={s,up:cy(.054,.048,PL.ua,skinM,0,0,0,14),sl:cy(.064,.06,.14,shirtM,0,0,0,14),fo:cy(.046,.04,PL.fa,skinM,0,0,0,14),jt:sp(.048,skinM,0,0,0),ha:el(.065,.062,.066,skinM,0,0,0),sd:sp(.07,shirtM,0,0,0)};player.add(A.up,A.sl,A.fo,A.jt,A.ha,A.sd);return A});
 }
 outline(player,.008);player.add(hand);
 
@@ -499,7 +507,7 @@ function armIK(A,S,T){
  tN.set(A.s*.8,-1,.3);tN.addScaledVector(tU,-tN.dot(tU));if(tN.lengthSq()<1e-4)tN.set(A.s,0,0);tN.normalize();
  tE.copy(S).addScaledVector(tU,a).addScaledVector(tN,h);
  tP.copy(S).addScaledVector(tU,d);
- segPlace(A.up,S,tE);segPlace(A.fo,tE,tP);A.jt.position.copy(tE);A.ha.position.copy(tP);A.sd.position.copy(S)}
+ segPlace(A.up,S,tE);segPlace(A.fo,tE,tP);tI.subVectors(tE,S).normalize().multiplyScalar(.14).add(S);segPlace(A.sl,S,tI);A.jt.position.copy(tE);A.ha.position.copy(tP);A.sd.position.copy(S)}
 /* وضع الجسم كل إطار: مشي، انحناء، قرفصاء، ذراعان، فرحة */
 function poseChar(dt,t){
  post+=(postT-post)*Math.min(1,dt*9);
