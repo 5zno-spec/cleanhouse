@@ -256,11 +256,37 @@ function mkItem(e,k){const g=new THREE.Group();g.add((MK[e]||MK["📄"])());cons
 
 /* ============ اليد ============ */
 const hand=new THREE.Group(),HIDLE=new THREE.Vector3(.3,-.34,-.6),HCARRY=new THREE.Vector3(.17,-.28,-.5);
-{const skin=M(0xf2c7a0,.8),slv=M(0x1fb5a5,.8);
- hand.add(bx(.09,.035,.09,skin,0,0,0),bx(.1,.1,.06,W0(),0,0,.08),bx(.085,.085,3.2,slv,0,0,1.7),R3(bx(.022,.022,.065,skin,-.06,0,-.03),0,.7,0));
- for(let i=0;i<4;i++)hand.add(bx(.018,.02,.075,skin,-.03+i*.02,0,-.075));
- hand.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false}});
- hand.position.copy(HIDLE);hand.rotation.set(-.1,.1,0);cam.add(hand);scene.add(cam)}
+const FING=[];let thumbJ=[],grip=.3;
+{const skin=M(0xe9b794,.55),nail=M(0xf6d9d0,.35),slv=M(0x1fb5a5,.85),cuff=M(0xffffff,.8);
+ const mk=(g,o)=>{o.castShadow=false;o.receiveShadow=false;g.add(o);return o};
+ /* كف مستدير ومعصم */
+ const palm=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),skin);palm.scale.set(.046,.017,.05);palm.position.set(0,0,-.005);mk(hand,palm);
+ const knu=new THREE.Mesh(new THREE.SphereGeometry(1,16,12),skin);knu.scale.set(.046,.014,.014);knu.position.set(0,.004,-.04);mk(hand,knu);
+ const wr=new THREE.Mesh(new THREE.CylinderGeometry(.033,.037,.12,16),skin);wr.rotation.x=Math.PI/2;wr.position.set(0,0,.07);mk(hand,wr);
+ /* كُم وسوار أبيض */
+ const sl=new THREE.Mesh(new THREE.CylinderGeometry(.052,.058,3.2,22),slv);sl.rotation.x=Math.PI/2;sl.position.set(0,0,1.75);mk(hand,sl);
+ const cf=new THREE.Mesh(new THREE.CylinderGeometry(.056,.056,.07,22),cuff);cf.rotation.x=Math.PI/2;cf.position.set(0,0,.14);mk(hand,cf);
+ for(let i=0;i<3;i++){const f=new THREE.Mesh(new THREE.TorusGeometry(.056,.006,6,20),slv);f.position.set(0,0,.3+i*.35);mk(hand,f)}
+ /* مقطع إصبع: كبسولة تمتد نحو -z */
+ const seg=(len,r)=>{const m=new THREE.Mesh(new THREE.CapsuleGeometry(r,len,4,10),skin);m.rotation.x=Math.PI/2;m.position.z=-(len/2+r*.5);m.castShadow=false;return m};
+ const finger=(x,len,r,splay)=>{
+  const j1=new THREE.Group(),j2=new THREE.Group(),j3=new THREE.Group();j1.position.set(x,0,-.046);j1.rotation.y=splay;
+  j1.add(seg(len[0],r));j2.position.z=-(len[0]+r);j2.add(seg(len[1],r*.95));j1.add(j2);
+  j3.position.z=-(len[1]+r*.95);j3.add(seg(len[2],r*.9));j2.add(j3);
+  const n=new THREE.Mesh(new THREE.SphereGeometry(1,10,8),nail);n.scale.set(r*.62,r*.22,r*.8);n.position.set(0,r*.82,-(len[2]+r*.1));n.castShadow=false;j3.add(n);
+  hand.add(j1);FING.push([j1,j2,j3])};
+ finger(-.031,[.028,.02,.016],.0095,.07);finger(-.011,[.032,.022,.017],.0098,.01);finger(.01,[.029,.02,.016],.0092,-.04);finger(.029,[.022,.015,.013],.0082,-.1);
+ /* إبهام */
+ const tb=new THREE.Group();tb.position.set(-.043,-.002,-.012);tb.rotation.set(0,.75,-.25);hand.add(tb);
+ const t1=new THREE.Group(),t2=new THREE.Group();t1.add(seg(.028,.0115));t2.position.z=-.04;t2.add(seg(.022,.0105));t1.add(t2);tb.add(t1);
+ const tn=new THREE.Mesh(new THREE.SphereGeometry(1,10,8),nail);tn.scale.set(.0075,.0028,.009);tn.position.set(0,.011,-.03);tn.castShadow=false;t2.add(tn);
+ thumbJ=[t1,t2];
+ hand.position.copy(HIDLE);hand.rotation.set(-.18,.12,-.08);cam.add(hand);scene.add(cam)}
+/* قبضة اليد: 0 مفتوحة، 1 مقبوضة */
+const FM=[1,1.05,1.1,1.18];
+function applyGrip(g){FING.forEach((f,i)=>{const m=FM[i];f[0].rotation.x=-(.12+g*1.0)*m;f[1].rotation.x=-(.15+g*1.45)*m;f[2].rotation.x=-(.08+g*.95)*m});
+ thumbJ[0].rotation.x=-(.05+g*.45);thumbJ[1].rotation.x=-(.08+g*.8)}
+applyGrip(grip);
 
 /* ============ بناء الغرفة ============ */
 let roomG=null,ZN={},zoneHits=[];
@@ -497,6 +523,7 @@ function frame(now){
    P.x+=(fx*my+rx*mx)*f;P.z+=(fz*my+rz*mx)*f;pushOut(P,PR);walkT+=dt*Math.min(1,ml)}
   cam.position.set(P.x,1.45+(ml>.01?Math.sin(walkT*9)*.012:0),P.z);cam.rotation.set(pitch,yaw,0);cam.updateMatrixWorld();
   if(!reaching)hand.position.lerp(carry?HCARRY:HIDLE,Math.min(1,dt*8));
+  {const gt=carry?.6:(reaching?.04:.3);grip+=(gt-grip)*Math.min(1,dt*12);applyGrip(grip)}
   for(let i=tw.length-1;i>=0;i--){const a=tw[i];a.t+=dt;const u=Math.min(1,a.t/a.dur);a.fn(u);if(u>=1){tw.splice(i,1);a.done&&a.done()}}
   for(const it of fall){const u=it.userData;u.vy-=14*dt;it.position.y+=u.vy*dt;it.rotation.x*=.9;it.rotation.z*=.9;
    if(it.position.y<=0){it.position.y=0;if(Math.abs(u.vy)>1.2)u.vy=-u.vy*.32;else{u.vy=0;fall.delete(it)}}}
