@@ -631,13 +631,15 @@ function start(m,l,intro){
  for(let i=0;i<cfg.n;i++){
   let k=cfg.z[i%cfg.z.length];if(!pools[k].length)k=cfg.z.find(q=>pools[q].length);
   let x=0,z=0,tr=0;do{const a=off+i*Math.PI*2/cfg.n+(Math.random()-.5)*.25+tr*.5,r=1.3+Math.random()*1.1+tr*.02;x=Math.sin(a)*r;z=-Math.cos(a)*r;tr++}while(blocked(x,z)&&tr<60);
+  /* حتى لو فشلت المحاولات: لا يبدأ غرض داخل أثاث ولا خارج الجدران */
+  {const q={x,z};pushOut(q,.3);x=q.x;z=q.z}
   const it=mkItem(pools[k].pop(),k);it.position.set(x,0,z);it.rotation.y=Math.random()*Math.PI*2;
   itemsG.add(it)}
  if(m==="time"){end=Date.now()+cfg.t*1000+(intro?1300:0);timer=setInterval(timerTick,100)}
 }
 
 /* ============ الحركة واليد والحمل ============ */
-const REACH=1.5,ZREACH=1.9,PR=.28;
+const REACH=1.5,ZREACH=1.9,PR=.28;let PRn=PR;
 const rc=new THREE.Raycaster(),tmpA=new THREE.Vector3(),tmpB=new THREE.Vector3(),floorPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
 let carry=null,busy=false,reaching=false,jx=0,jy=0,rotP=null,dStart={x:0,y:0},walkT=0;
 const K={};
@@ -648,10 +650,24 @@ function pickItem(x,y){rc.setFromCamera(ndcOf(x,y),cam);
  let o=h.object;while(o.parent&&o.parent!==itemsG)o=o.parent;return o}
 function zoneAt(x,y){rc.setFromCamera(ndcOf(x,y),cam);const h=rc.intersectObjects(zoneHits,false)[0];return h?ZN[h.object.userData.k]:null}
 /* يبقي النقطة داخل الغرفة وخارج مساحة الأثاث */
-function pushOut(p,r){const lim=R-.35;p.x=clamp(p.x,-lim,lim);p.z=clamp(p.z,-lim,lim);
- for(const b of OBS){const x0=b.min.x-r,x1=b.max.x+r,z0=b.min.z-r,z1=b.max.z+r;
-  if(p.x>x0&&p.x<x1&&p.z>z0&&p.z<z1){const dl=p.x-x0,dr=x1-p.x,dt=p.z-z0,db=z1-p.z,m=Math.min(dl,dr,dt,db);
-   if(m===dl)p.x=x0;else if(m===dr)p.x=x1;else if(m===dt)p.z=z0;else p.z=z1}}}
+function pushOut(p,r){const lim=R-.35,ok=(x,z)=>x>=-lim&&x<=lim&&z>=-lim&&z<=lim;
+ p.x=clamp(p.x,-lim,lim);p.z=clamp(p.z,-lim,lim);
+ /* عدة مرات: الخروج من قطعة أثاث قد يُدخل النقطة في قطعة مجاورة */
+ for(let pass=0;pass<4;pass++){let moved=false;
+  for(const b of OBS){const x0=b.min.x-r,x1=b.max.x+r,z0=b.min.z-r,z1=b.max.z+r;
+   if(p.x>x0&&p.x<x1&&p.z>z0&&p.z<z1){
+    /* أقرب مخرج يبقى داخل الغرفة، فلا تُدفع النقطة خلف الجدار أبدًا */
+    const c=[[p.x-x0,x0,p.z],[x1-p.x,x1,p.z],[p.z-z0,p.x,z0],[z1-p.z,p.x,z1]].filter(o=>ok(o[1],o[2])).sort((a,b)=>a[0]-b[0]);
+    if(c.length){p.x=c[0][1];p.z=c[0][2];moved=true}}}
+  if(!moved)break}
+ /* فجوة ضيقة بين قطعتين: نختار أقرب نقطة خالية فعلًا بدل التأرجح بينهما */
+ const hit=(x,z)=>OBS.some(b=>x>b.min.x-r&&x<b.max.x+r&&z>b.min.z-r&&z<b.max.z+r);
+ if(hit(p.x,p.z)){let best=null,bd=1e9;
+  for(const b of OBS)for(const [x,z] of [[b.min.x-r,p.z],[b.max.x+r,p.z],[p.x,b.min.z-r],[p.x,b.max.z+r]]){
+   const cx=clamp(x,-lim,lim),cz=clamp(z,-lim,lim);
+   if(!hit(cx,cz)){const d=(cx-p.x)**2+(cz-p.z)**2;if(d<bd){bd=d;best=[cx,cz]}}}
+  if(best){p.x=best[0];p.z=best[1]}}
+ p.x=clamp(p.x,-lim,lim);p.z=clamp(p.z,-lim,lim)}
 
 /* مدّ اليد نحو نقطة في العالم ثم تنفيذ الدالة عند الوصول */
 function reach(wp,dur,cb,back=.12){busy=true;reaching=true;cam.updateMatrixWorld();
@@ -689,7 +705,7 @@ function tryDrop(wp){
  if(busy||over||!carry)return;
  const it=carry;let x,z;
  if(wp&&distTo(wp.x,wp.z)<=ZREACH){x=wp.x;z=wp.z}else{x=P.x-Math.sin(yaw)*1.0;z=P.z-Math.cos(yaw)*1.0}
- const q={x,z};pushOut(q,.15);
+ const q={x,z};pushOut(q,.2);
  reach(new THREE.Vector3(q.x,.25,q.z),.3,()=>{
   itemsG.attach(it);carry=null;it.userData.vy=0;fall.add(it);
   const x0=it.position.x,z0=it.position.z;tween(.3,t=>{it.position.x=x0+(q.x-x0)*t;it.position.z=z0+(q.z-z0)*t});
@@ -793,7 +809,9 @@ function frame(now){
   yaw+=(tgtYaw-yaw)*Math.min(1,dt*10);
   const ml=Math.hypot(mx,my);if(ml>1){mx/=ml;my/=ml}
   if(ml>.01&&!over){const f=2*dt,fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw);
-   P.x+=(fx*my+rx*mx)*f;P.z+=(fz*my+rz*mx)*f;pushOut(P,PR);walkT+=dt*Math.min(1,ml)}
+   P.x+=(fx*my+rx*mx)*f;P.z+=(fz*my+rz*mx)*f;walkT+=dt*Math.min(1,ml)}
+  /* أثناء الحمل يتسع نصف قطر اللاعب بالتدريج كي لا يخترق الغرض المحمول الأثاث */
+  PRn+=((carry?PR+.22:PR)-PRn)*Math.min(1,dt*6);pushOut(P,PRn);
   cam.position.set(P.x,1.45+(ml>.01?Math.sin(walkT*9)*.012:0),P.z);cam.rotation.set(pitch,yaw,0);cam.updateMatrixWorld();
   if(!reaching)hand.position.lerp(carry?HCARRY:HIDLE,Math.min(1,dt*8));
   /* اليدان مخفيتان إلا عند المدّ للغرض وحمله */
