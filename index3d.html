@@ -254,39 +254,83 @@ const MK={
 };
 function mkItem(e,k){const g=new THREE.Group();g.add((MK[e]||MK["📄"])());const hs=new THREE.Mesh(new THREE.SphereGeometry(.2,10,8),hidMat());hs.position.y=.12;g.add(hs);const rg=new THREE.Mesh(new THREE.RingGeometry(.2,.25,28),new THREE.MeshBasicMaterial({color:0xffc93c,transparent:true,opacity:.9,side:THREE.DoubleSide,depthWrite:false}));rg.rotation.x=-Math.PI/2;rg.position.y=.012;rg.visible=false;g.add(rg);g.userData={k,e,placed:false,rg};return g}
 
-/* ============ اليد ============ */
-const hand=new THREE.Group(),HIDLE=new THREE.Vector3(.3,-.34,-.6),HCARRY=new THREE.Vector3(.17,-.28,-.5);
-const FING=[];let thumbJ=[],grip=.3;
-{const skin=M(0xe9b794,.55),nail=M(0xf6d9d0,.35),slv=M(0x1fb5a5,.85),cuff=M(0xffffff,.8);
- const mk=(g,o)=>{o.castShadow=false;o.receiveShadow=false;g.add(o);return o};
- /* كف مستدير ومعصم */
- const palm=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),skin);palm.scale.set(.046,.017,.05);palm.position.set(0,0,-.005);mk(hand,palm);
- const knu=new THREE.Mesh(new THREE.SphereGeometry(1,16,12),skin);knu.scale.set(.046,.014,.014);knu.position.set(0,.004,-.04);mk(hand,knu);
- const wr=new THREE.Mesh(new THREE.CylinderGeometry(.033,.037,.12,16),skin);wr.rotation.x=Math.PI/2;wr.position.set(0,0,.07);mk(hand,wr);
- /* كُم وسوار أبيض */
- const sl=new THREE.Mesh(new THREE.CylinderGeometry(.052,.058,3.2,22),slv);sl.rotation.x=Math.PI/2;sl.position.set(0,0,1.75);mk(hand,sl);
- const cf=new THREE.Mesh(new THREE.CylinderGeometry(.056,.056,.07,22),cuff);cf.rotation.x=Math.PI/2;cf.position.set(0,0,.14);mk(hand,cf);
- for(let i=0;i<3;i++){const f=new THREE.Mesh(new THREE.TorusGeometry(.056,.006,6,20),slv);f.position.set(0,0,.3+i*.35);mk(hand,f)}
- /* مقطع إصبع: كبسولة تمتد نحو -z */
- const seg=(len,r)=>{const m=new THREE.Mesh(new THREE.CapsuleGeometry(r,len,4,10),skin);m.rotation.x=Math.PI/2;m.position.z=-(len/2+r*.5);m.castShadow=false;return m};
- const finger=(x,len,r,splay)=>{
-  const j1=new THREE.Group(),j2=new THREE.Group(),j3=new THREE.Group();j1.position.set(x,0,-.046);j1.rotation.y=splay;
-  j1.add(seg(len[0],r));j2.position.z=-(len[0]+r);j2.add(seg(len[1],r*.95));j1.add(j2);
-  j3.position.z=-(len[1]+r*.95);j3.add(seg(len[2],r*.9));j2.add(j3);
-  const n=new THREE.Mesh(new THREE.SphereGeometry(1,10,8),nail);n.scale.set(r*.62,r*.22,r*.8);n.position.set(0,r*.82,-(len[2]+r*.1));n.castShadow=false;j3.add(n);
-  hand.add(j1);FING.push([j1,j2,j3])};
- finger(-.031,[.028,.02,.016],.0095,.07);finger(-.011,[.032,.022,.017],.0098,.01);finger(.01,[.029,.02,.016],.0092,-.04);finger(.029,[.022,.015,.013],.0082,-.1);
- /* إبهام */
- const tb=new THREE.Group();tb.position.set(-.043,-.002,-.012);tb.rotation.set(0,.75,-.25);hand.add(tb);
- const t1=new THREE.Group(),t2=new THREE.Group();t1.add(seg(.028,.0115));t2.position.z=-.04;t2.add(seg(.022,.0105));t1.add(t2);tb.add(t1);
- const tn=new THREE.Mesh(new THREE.SphereGeometry(1,10,8),nail);tn.scale.set(.0075,.0028,.009);tn.position.set(0,.011,-.03);tn.castShadow=false;t2.add(tn);
- thumbJ=[t1,t2];
- hand.position.copy(HIDLE);hand.rotation.set(-.18,.12,-.08);cam.add(hand);scene.add(cam)}
-/* قبضة اليد: 0 مفتوحة، 1 مقبوضة */
+/* ============ اليدان ============ */
+const hand=new THREE.Group(),HIDLE=new THREE.Vector3(0,-.34,-.6),HCARRY=new THREE.Vector3(0,-.23,-.55);
+/* أوضاع اليدين: sp البعد عن المنتصف، roll ميل الكف للداخل، grip القبضة، yaw انحراف للداخل، pitch ميل للأسفل */
+const IP={sp:.3,roll:.08,grip:.3,yaw:.12,pitch:-.18},CP={sp:.1,roll:1.3,grip:.5,yaw:.04,pitch:-.1},OP={sp:.14,roll:1.1,grip:.04,yaw:.05,pitch:-.12};
+const HS=Object.assign({},IP),HANDS=[];
 const FM=[1,1.05,1.1,1.18];
-function applyGrip(g){FING.forEach((f,i)=>{const m=FM[i];f[0].rotation.x=-(.12+g*1.0)*m;f[1].rotation.x=-(.15+g*1.45)*m;f[2].rotation.x=-(.08+g*.95)*m});
- thumbJ[0].rotation.x=-(.05+g*.45);thumbJ[1].rotation.x=-(.08+g*.8)}
-applyGrip(grip);
+/* يد واحدة: side=1 يمين، side=-1 يسار (مرآة) */
+function buildHand(side){
+ const root=new THREE.Group(),body=new THREE.Group();body.scale.x=side;root.add(body);root.rotation.order="YXZ";
+ const skin=M(0xe9b794,.5),tipM=M(0xe3a086,.5),nail=M(0xf8e1da,.22),slv=M(0x1fb5a5,.85),cuff=M(0xffffff,.8);
+ [skin,tipM].forEach(m=>{m.emissive.setHex(0x2a0d05);m.emissiveIntensity=.3});
+ const put=(o,g)=>{o.castShadow=false;o.receiveShadow=false;(g||body).add(o);return o};
+ const ell=(m,sx,sy,sz,x,y,z)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(1,20,14),m);o.scale.set(sx,sy,sz);o.position.set(x,y,z);return put(o)};
+ /* مقطع مستدق يمتد نحو -z، وكرة عند المفصل لتنعيم الانحناء */
+ const seg=(g,len,ra,rb,m)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(ra,rb,len,14),m||skin);o.rotation.x=Math.PI/2;o.scale.z=.92;o.position.z=-len/2;return put(o,g)};
+ const jt=(g,r)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(r,12,10),skin);o.scale.z=.92;return put(o,g)};
+ const nl=(g,sx,sz,y,z)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(1,12,8),nail);o.scale.set(sx,sx*.28,sz);o.position.set(0,y,z);return put(o,g)};
+ /* الكف: جسم رئيسي + كعب الكف + منطقة الإبهام + ظهر اليد */
+ ell(skin,.043,.0155,.046,0,0,-.004);
+ ell(skin,.022,.013,.034,.025,-.003,.012);
+ ell(skin,.02,.015,.03,-.027,-.007,.004);
+ ell(skin,.044,.011,.044,0,.006,-.006);
+ /* المعصم بيضاوي */
+ const wr=new THREE.Mesh(new THREE.CylinderGeometry(.03,.034,.12,18),skin);wr.rotation.x=Math.PI/2;wr.scale.set(1.12,1,.85);wr.position.set(0,0,.085);put(wr);
+ /* الكُم والسوار الأبيض */
+ const sl=new THREE.Mesh(new THREE.CylinderGeometry(.052,.058,3.2,22),slv);sl.rotation.x=Math.PI/2;sl.position.set(0,0,1.75);put(sl);
+ const cf=new THREE.Mesh(new THREE.CylinderGeometry(.056,.056,.07,22),cuff);cf.rotation.x=Math.PI/2;cf.position.set(0,0,.14);put(cf);
+ for(let i=0;i<3;i++){const f=new THREE.Mesh(new THREE.TorusGeometry(.056,.006,6,20),slv);f.position.set(0,0,.3+i*.35);put(f)}
+ /* الأصابع: ثلاث سلاميات مستدقة، نهايتها أحمر قليلًا مع ظفر */
+ const fing=[];
+ const finger=(x,z0,len,r,splay)=>{
+  const j1=new THREE.Group(),j2=new THREE.Group(),j3=new THREE.Group(),r1=r*.92,r2=r*.84,r3=r*.74;
+  j1.position.set(x,.003,z0);j1.rotation.y=splay;
+  jt(j1,r);seg(j1,len[0],r,r1);
+  j2.position.z=-len[0];jt(j2,r1);seg(j2,len[1],r1,r2);j1.add(j2);
+  j3.position.z=-len[1];jt(j3,r2);seg(j3,len[2],r2,r3,tipM);j2.add(j3);
+  const tp=new THREE.Mesh(new THREE.SphereGeometry(r3,12,10),tipM);tp.scale.set(1,.92,1.15);tp.position.z=-len[2];put(tp,j3);
+  nl(j3,r3*.62,len[2]*.5,r3*.8,-len[2]*.62);
+  ell(skin,r*1.05,r*1.02,r*1.1,x,.004,z0+.004);
+  body.add(j1);fing.push([j1,j2,j3])};
+ finger(-.0315,-.044,[.04,.023,.019],.0088,.06);
+ finger(-.0105,-.048,[.044,.027,.02],.0092,0);
+ finger(.0105,-.045,[.041,.025,.02],.0087,-.05);
+ finger(.0315,-.039,[.032,.018,.017],.0075,-.12);
+ /* الإبهام: ثلاث سلاميات تدور نحو الأصابع عند القبض */
+ const tb=new THREE.Group();tb.position.set(-.03,-.004,.01);tb.rotation.set(0,.8,-.3);body.add(tb);
+ const t0=new THREE.Group(),t1=new THREE.Group(),t2=new THREE.Group();
+ jt(t0,.0125);seg(t0,.04,.0125,.0112);tb.add(t0);
+ t1.position.z=-.04;jt(t1,.0112);seg(t1,.032,.0112,.0102);t0.add(t1);
+ t2.position.z=-.032;jt(t2,.0102);seg(t2,.027,.0102,.0088,tipM);t1.add(t2);
+ const tt=new THREE.Mesh(new THREE.SphereGeometry(.0088,12,10),tipM);tt.scale.set(1,.92,1.15);tt.position.z=-.027;put(tt,t2);
+ nl(t2,.0064,.0135,.0075,-.016);
+ return{root,fing,thumb:[t0,t1,t2],tb,side}}
+/* قبضة اليد: 0 مفتوحة، 1 مقبوضة */
+function setGrip(H,g){
+ H.fing.forEach((f,i)=>{const m=FM[i];f[0].rotation.x=-(.1+g*1.05)*m;f[1].rotation.x=-(.12+g*1.5)*m;f[2].rotation.x=-(.06+g*.9)*m});
+ H.thumb[0].rotation.x=-(.02+g*.25);H.thumb[1].rotation.x=-(.05+g*.5);H.thumb[2].rotation.x=-(.06+g*.7);H.tb.rotation.y=.8-g*.35}
+[1,-1].forEach(s=>{const H=buildHand(s);HANDS.push(H);hand.add(H.root);setGrip(H,HS.grip)});
+hand.position.copy(HIDLE);cam.add(hand);scene.add(cam);
+/* تحريك اليدين كل إطار: تقترب للداخل وتميل الكفّان عند الحمل، وتنفتحان عند المدّ */
+function updateHands(dt,t){
+ const T=carry?CP:reaching?OP:IP,k=Math.min(1,dt*11),still=carry||reaching;
+ for(const p in IP)HS[p]+=(T[p]-HS[p])*k;
+ const bob=still?0:Math.sin(walkT*9)*.004;
+ HANDS.forEach((H,i)=>{const s=H.side,ph=i*1.7,sw=Math.sin(t*1.5+ph);
+  H.root.position.set(s*HS.sp,(still?0:(i?-.012:0))+sw*.003*(carry?.4:1)+bob,0);
+  H.root.rotation.set(HS.pitch+sw*.01,s*HS.yaw,-s*HS.roll);
+  setGrip(H,HS.grip+(still?0:Math.sin(t*1.2+ph)*.03))})}
+/* وضع الحمل المناسب لحجم الغرض: يقف الغرض بين اليدين ووجهه نحو اللاعب */
+function holdPose(it){
+ const q=it.quaternion.clone();it.quaternion.identity();it.updateMatrixWorld(true);
+ const b=new THREE.Box3().setFromObject(it.children[0]),s=b.getSize(new THREE.Vector3()),c=b.getCenter(new THREE.Vector3()).sub(it.position);
+ it.quaternion.copy(q);it.updateMatrixWorld(true);
+ const flat=s.y<.07,turn=s.x>s.z?Math.PI/2:0,Y=new THREE.Vector3(0,1,0);
+ const qf=new THREE.Quaternion().setFromAxisAngle(Y,.2).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(flat?Math.PI/2:0,0,0))).multiply(new THREE.Quaternion().setFromAxisAngle(Y,turn));
+ CP.sp=clamp(Math.min(s.x,s.z)/2+.03,.07,.2);CP.grip=flat?.42:.55;
+ return{q:qf,p:new THREE.Vector3(0,0,-.075).sub(c.applyQuaternion(qf))}}
 
 /* ============ بناء الغرفة ============ */
 let roomG=null,ZN={},zoneHits=[];
@@ -379,7 +423,7 @@ function start(m,l){
  say(m==="time"?"هيا بسرعة! الصواب يزيد الوقت، والخطأ يخصم 3 ثوانٍ.":"اسحب كل غرض إلى مكانه الصحيح. خذ وقتك!");
  buildRoom(cfg.z);
  while(itemsG.children.length){const c=itemsG.children[0];itemsG.remove(c);disposeG(c)}
- [...hand.children].forEach(c=>{if(c.userData&&c.userData.k){hand.remove(c);disposeG(c)}});hand.position.copy(HIDLE);$("dp").hidden=true;dpShown=false;
+ [...hand.children].forEach(c=>{if(c.userData&&c.userData.k){hand.remove(c);disposeG(c)}});hand.position.copy(HIDLE);Object.assign(HS,IP);$("dp").hidden=true;dpShown=false;
  yaw=tgtYaw=0;pitch=-.28;P.x=0;P.z=0;
  const pools={};cfg.z.forEach(k=>pools[k]=shuffle(Z[k].items));
  const off=Math.random()*Math.PI*2;
@@ -408,8 +452,8 @@ function pushOut(p,r){const lim=R-.35;p.x=clamp(p.x,-lim,lim);p.z=clamp(p.z,-lim
    if(m===dl)p.x=x0;else if(m===dr)p.x=x1;else if(m===dt)p.z=z0;else p.z=z1}}}
 
 /* مدّ اليد نحو نقطة في العالم ثم تنفيذ الدالة عند الوصول */
-function reach(wp,dur,cb){busy=true;reaching=true;cam.updateMatrixWorld();
- const a=hand.position.clone(),b=cam.worldToLocal(wp.clone());b.z+=.12;
+function reach(wp,dur,cb,back=.12){busy=true;reaching=true;cam.updateMatrixWorld();
+ const a=hand.position.clone(),b=cam.worldToLocal(wp.clone());b.z+=back;
  tween(dur,t=>{const e=t*t*(3-2*t);hand.position.lerpVectors(a,b,e)},()=>{cb&&cb()})}
 function retreat(pose,cb){const h0=hand.position.clone();
  tween(.25,t=>hand.position.lerpVectors(h0,pose,t),()=>{reaching=false;busy=false;cb&&cb()})}
@@ -420,19 +464,24 @@ function tryGrab(it){
  if(carry){say("أنت تحمل غرضًا. ضعه في مكانه أولًا، أو اتركه.");return}
  if(distTo(it.position.x,it.position.z)>REACH){say("اقترب من "+(NM[u.e]||"الغرض")+" لتمسكه");return}
  fall.delete(it);snd(520,.06);
- reach(new THREE.Vector3(it.position.x,it.position.y+.1,it.position.z),.28,()=>{
+ /* اليدان تنفتحان بقدر عرض الغرض ثم تطبقان عليه من الجانبين */
+ const gb=new THREE.Box3().setFromObject(it.children[0]),gs=gb.getSize(new THREE.Vector3());
+ OP.sp=clamp(Math.abs(Math.cos(yaw))*gs.x/2+Math.abs(Math.sin(yaw))*gs.z/2+.05,.075,.21);
+ reach(new THREE.Vector3(it.position.x,it.position.y+.1,it.position.z),.3,()=>{
+  const hp=holdPose(it);
   hand.attach(it);carry=it;u.rg.visible=false;
-  const p0=it.position.clone(),p1=new THREE.Vector3(0,.045,-.15),q0=it.quaternion.clone(),q1=new THREE.Quaternion().setFromEuler(new THREE.Euler(0,.4,0));
-  tween(.22,t=>{it.position.lerpVectors(p0,p1,t);it.quaternion.slerpQuaternions(q0,q1,t)});
+  const p0=it.position.clone(),q0=it.quaternion.clone();
+  tween(.3,t=>{const e=t*t*(3-2*t);it.position.lerpVectors(p0,hp.p,e);it.quaternion.slerpQuaternions(q0,hp.q,e)});
   retreat(HCARRY);
-  say((NM[u.e]||"الغرض")+" في يدك. اذهب به إلى مكانه واضغط عليه.")})}
+  say((NM[u.e]||"الغرض")+" في يديك. اذهب به إلى مكانه واضغط عليه.")})}
 
 function tryPlace(z){
  if(busy||over||!carry)return;
  if(distTo(z.g.position.x,z.g.position.z)>ZREACH){say("اقترب من "+Z[z.k].n+" أكثر");z.hintT=.6;return}
  const it=carry,slot=z.slots[z.n%z.slots.length].clone();
- if(it.userData.k!==z.k){reach(slot,.3,()=>wrong(it,z));return}
- reach(slot,.32,()=>{itemsG.attach(it);carry=null;correct(it,z);retreat(HIDLE)})}
+ if(it.userData.k!==z.k){reach(slot,.3,()=>wrong(it,z),.2);return}
+ /* اليدان تحملان الغرض إلى مكانه، ثم تضعانه وتنفتحان وتنسحبان */
+ reach(slot,.42,()=>{itemsG.attach(it);carry=null;correct(it,z,true);tween(.32,()=>{},()=>retreat(HIDLE))},.2)}
 
 function tryDrop(wp){
  if(busy||over||!carry)return;
@@ -442,7 +491,7 @@ function tryDrop(wp){
  reach(new THREE.Vector3(q.x,.25,q.z),.3,()=>{
   itemsG.attach(it);carry=null;it.userData.vy=0;fall.add(it);
   const x0=it.position.x,z0=it.position.z;tween(.3,t=>{it.position.x=x0+(q.x-x0)*t;it.position.z=z0+(q.z-z0)*t});
-  retreat(HIDLE);say("")})}
+  tween(.2,()=>{},()=>retreat(HIDLE));say("")})}
 
 function tapAt(x,y){
  if(over||busy)return;
@@ -480,10 +529,10 @@ function starAt(z){const v=tmpB.copy(z.g.position);v.y=1.2;v.project(cam);
  const s=document.createElement("div");s.className="star";s.textContent="⭐";
  s.style.left=((v.x*.5+.5)*room.clientWidth-14)+"px";s.style.top=((-v.y*.5+.5)*room.clientHeight-14)+"px";room.appendChild(s);setTimeout(()=>s.remove(),900)}
 
-function correct(it,z){
+function correct(it,z,soft){
  const u=it.userData;u.placed=true;fall.delete(it);
- const p1=z.slots[(z.n++)%z.slots.length].clone(),p0=it.position.clone(),s0=it.scale.x,r0=it.rotation.clone(),ry=(Math.random()-.5)*.8;
- tween(.6,t=>{const e=1-Math.pow(1-t,3);it.position.lerpVectors(p0,p1,e);it.position.y+=Math.sin(Math.PI*t)*.35;it.scale.setScalar(s0+(1-s0)*e);it.rotation.set(r0.x*(1-e),r0.y+(ry-r0.y)*e,r0.z*(1-e))},()=>it.position.copy(p1));
+ const p1=z.slots[(z.n++)%z.slots.length].clone(),p0=it.position.clone(),s0=it.scale.x,q0=it.quaternion.clone(),q1=new THREE.Quaternion().setFromEuler(new THREE.Euler(0,(Math.random()-.5)*.8,0));
+ tween(.6,t=>{const e=1-Math.pow(1-t,3);it.position.lerpVectors(p0,p1,e);it.position.y+=Math.sin(Math.PI*t)*(soft?.08:.35);it.scale.setScalar(s0+(1-s0)*e);it.quaternion.slerpQuaternions(q0,q1,e)},()=>it.position.copy(p1));
  tween(.35,t=>z.g.scale.setScalar(1+.04*Math.sin(Math.PI*t)),()=>z.g.scale.setScalar(1));
  starAt(z);sfx(z.k);setTimeout(()=>snd(880,.1),130);
  left--;hud();
@@ -523,7 +572,7 @@ function frame(now){
    P.x+=(fx*my+rx*mx)*f;P.z+=(fz*my+rz*mx)*f;pushOut(P,PR);walkT+=dt*Math.min(1,ml)}
   cam.position.set(P.x,1.45+(ml>.01?Math.sin(walkT*9)*.012:0),P.z);cam.rotation.set(pitch,yaw,0);cam.updateMatrixWorld();
   if(!reaching)hand.position.lerp(carry?HCARRY:HIDLE,Math.min(1,dt*8));
-  {const gt=carry?.6:(reaching?.04:.3);grip+=(gt-grip)*Math.min(1,dt*12);applyGrip(grip)}
+  updateHands(dt,t);
   for(let i=tw.length-1;i>=0;i--){const a=tw[i];a.t+=dt;const u=Math.min(1,a.t/a.dur);a.fn(u);if(u>=1){tw.splice(i,1);a.done&&a.done()}}
   for(const it of fall){const u=it.userData;u.vy-=14*dt;it.position.y+=u.vy*dt;it.rotation.x*=.9;it.rotation.z*=.9;
    if(it.position.y<=0){it.position.y=0;if(Math.abs(u.vy)>1.2)u.vy=-u.vy*.32;else{u.vy=0;fall.delete(it)}}}
