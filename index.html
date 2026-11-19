@@ -462,36 +462,48 @@ let pYaw=0,pYawT=0,post=0,postT=0,aw=0,cheerT=0,shakeV=0,hopV=0,mv=0,walkPh=0,lp
 const wrapA=a=>Math.atan2(Math.sin(a),Math.cos(a)),UPV=new THREE.Vector3(0,1,0);
 const torsoG=new THREE.Group(),headG=new THREE.Group();
 let LEGS,ARMS;
-{const skinM=M(0xe9b48a,.6),shirtM=M(0x9cc8ee,.8),whiteM=M(0xffffff,.8),pantsM=M(0x4a4f5c,.85),cuffM=M(0x3a3e4a,.85),shoeM=M(0x5b82b5,.7),hairM=M(0x1c1a22,.7),browM=M(0x4a2a1c,.5),inkM=M(0x1c1a22,.5),pinkM=M(0xf08a7a,.9),noseM=M(0xd99a76,.7),mouthM=M(0x8a3f35,.6),redM=M(0xe0574a,.6),orgM=M(0xffa63c,.6),blueM=M(0x3d8fd1,.6);
+{const skinM=M(0xf0b88f,.6),shirtM=M(0x9cc8ee,.8),hemM=M(0x86b4dc,.8),whiteM=M(0xffffff,.8),pantsM=M(0x4a4f5c,.85),cuffM=M(0x3a3e4a,.85),shoeM=M(0x5b82b5,.7),shoeDkM=M(0x44679a,.7),hairM=M(0x1c1a22,.7),irisM=M(0x6b3a22,.5),inkM=M(0x1c1a22,.5),pinkM=M(0xf08a7a,.9),noseM=M(0xe0a07c,.7),earM=M(0xe0a07c,.7),mouthM=M(0x8a3f35,.6),redM=M(0xe0574a,.6),orgM=M(0xffa63c,.6),blueM=M(0x3d8fd1,.6),yelM=M(0xffd23c,.6);
  skinM.emissive.setHex(0x2a0d05);skinM.emissiveIntensity=.15;
- /* الجذع: بنطلون رمادي بخيطين، وقميص أزرق فاتح عليه صاروخ، وعنق */
- torsoG.add(rbox(.38,.14,.25,.06,pantsM,0,.06,0),rbox(.42,.36,.25,.09,shirtM,0,.28,0),cy(.05,.055,.09,skinM,0,.47,0,14));
- torsoG.add(el(.012,.03,.008,inkM,-.025,.04,-.128),el(.012,.03,.008,inkM,.025,.04,-.128));
- const rk=new THREE.Group();rk.position.set(0,.3,-.13);rk.rotation.z=-.7;
+ const cap=(r,L,m)=>sh(new THREE.Mesh(new THREE.CapsuleGeometry(r,Math.max(.002,L-2*r),6,14),m));
+ /* اليد: كفّ مفلطحة وأربعة أصابع بطول مختلف وإبهام، الراحة تنظر للداخل */
+ const mkHand=(s,m)=>{const g=new THREE.Group();g.add(el(.03,.068,.056,m,0,.055,0));
+  [[.036,.054],[.012,.06],[-.012,.056],[-.036,.044]].forEach(([z,L])=>{const f=sh(new THREE.Mesh(new THREE.CapsuleGeometry(.0135,L,4,8),m));f.position.set(-s*.012,.108+L/2,z);f.rotation.z=s*.28;g.add(f)});
+  const th=sh(new THREE.Mesh(new THREE.CapsuleGeometry(.015,.04,4,8),m));th.position.set(-s*.032,.06,.05);th.rotation.set(.9,0,s*.3);g.add(th);return g};
+ /* الجذع: قميص أزرق فاتح بحافة وياقة وصاروخ على الصدر، وفوق بنطلون رمادي بخيطين وجيبين */
+ torsoG.add(rbox(.38,.14,.25,.06,pantsM,0,.06,0),rbox(.42,.36,.25,.09,shirtM,0,.28,0),rbox(.43,.045,.258,.016,hemM,0,.12,0),cy(.05,.055,.09,skinM,0,.47,0,14),R3(tor(.06,.013,Math.PI*2,hemM,0,.455,0),Math.PI/2,0,0));
+ [-1,1].forEach(s=>{torsoG.add(R3(el(.045,.006,.008,cuffM,s*.125,.05,-.127),0,0,-s*.5));const c=cap(.006,.06,inkM);c.position.set(s*.022,.045,-.13);torsoG.add(c)});
+ const rk=new THREE.Group();rk.position.set(0,.3,-.13);rk.rotation.z=-.7;rk.scale.setScalar(1.15);
  rk.add(el(.02,.042,.01,whiteM,0,0,0),el(.014,.02,.011,redM,0,.04,0),sp(.009,blueM,0,.008,-.008),el(.012,.022,.008,orgM,0,-.055,0),el(.012,.01,.012,redM,-.017,-.025,0),el(.012,.01,.012,redM,.017,-.025,0));
- torsoG.add(rk);
- /* الرأس: يتّجه وجهه نحو -z، بأذنين بارزتين وعينين بنيّتين كبيرتين */
+ torsoG.add(rk,sp(.006,yelM,-.07,.36,-.128),sp(.005,yelM,.075,.33,-.128),sp(.005,yelM,.06,.25,-.128),sp(.005,yelM,-.06,.24,-.128));
+ /* الرأس: يتّجه وجهه نحو -z، أذنان بارزتان وعينان بنيّتان لامعتان وابتسامة */
  headG.position.set(0,.5,0);
- headG.add(el(.21,.205,.2,skinM,0,.17,0),el(.05,.062,.04,skinM,-.205,.17,0),el(.05,.062,.04,skinM,.205,.17,0),el(.022,.02,.022,noseM,0,.145,-.2));
- [-1,1].forEach(s=>headG.add(el(.033,.045,.022,browM,s*.075,.185,-.176),sp(.012,whiteM,s*.082,.2,-.194),el(.036,.021,.012,pinkM,s*.13,.115,-.15),R3(el(.042,.011,.01,inkM,s*.078,.243,-.168),0,0,-s*.12)));
- const smile=tor(.04,.008,Math.PI,mouthM,0,.115,-.19);smile.rotation.z=Math.PI;headG.add(smile);
- /* شعر أسود مجعّد: قبعة تغطي الجزء الخلفي، وكرات صغيرة تشكّل الخصلات */
- const cap=sh(new THREE.Mesh(new THREE.SphereGeometry(.212,28,16,0,Math.PI*2,0,Math.PI*.5),hairM));cap.position.set(0,.17,0);cap.rotation.x=.6;headG.add(cap);
- for(const [th,n] of [[0,1],[.45,6],[.75,9],[1.15,11]])for(let i=0;i<n;i++){const ph=i*Math.PI*2/n+th*1.3;
-  if(th>.9&&Math.abs(wrapA(ph-Math.PI))<1.15)continue;
-  const j=Math.sin(i*12.9+th*7.3),r=.055+.012*Math.abs(j),d=.2+.012*j;
+ headG.add(el(.21,.205,.2,skinM,0,.17,0),el(.15,.09,.15,skinM,0,.09,-.01),el(.024,.022,.024,noseM,0,.143,-.199));
+ [-1,1].forEach(s=>{const x=s*.076;
+  headG.add(el(.05,.065,.04,skinM,s*.205,.165,0),el(.028,.04,.02,earM,s*.211,.165,-.012),
+   el(.037,.05,.02,whiteM,x,.185,-.173),el(.027,.039,.014,irisM,x,.185,-.19),el(.014,.021,.009,inkM,x,.185,-.2),sp(.009,whiteM,x+s*.009,.2,-.205),
+   el(.04,.022,.012,pinkM,s*.13,.115,-.15),R3(el(.046,.012,.011,inkM,x,.242,-.167),0,0,-s*.12))});
+ const smile=tor(.042,.009,Math.PI,mouthM,0,.115,-.19);smile.rotation.z=Math.PI;headG.add(smile);
+ /* شعر أسود مجعّد: قبعة تغطي الرأس، وفوقها عدّة حلقات من الخصلات الكروية */
+ const hcap=sh(new THREE.Mesh(new THREE.SphereGeometry(.212,28,16,0,Math.PI*2,0,Math.PI*.5),hairM));hcap.position.set(0,.17,0);hcap.rotation.x=.6;headG.add(hcap);
+ for(const [th,n] of [[0,1],[.3,5],[.6,8],[.9,11],[1.2,13],[1.45,10]])for(let i=0;i<n;i++){const ph=i*Math.PI*2/n+th*1.3;
+  if(th>.8&&th<1.4&&Math.abs(wrapA(ph-Math.PI))<1.15)continue;
+  if(th>1.4&&Math.abs(wrapA(ph))>1.3)continue;
+  const j=Math.sin(i*12.9+th*7.3),r=.058+.014*Math.abs(j),d=.2+.014*j;
   headG.add(sp(r,hairM,Math.sin(th)*Math.sin(ph)*d,.17+Math.cos(th)*d*.98,Math.sin(th)*Math.cos(ph)*d))}
  torsoG.add(headG);player.add(torsoG);
- /* الساقان: بنطلون مثني الأطراف، جوارب بيضاء، حذاء أزرق بنعل أبيض */
+ /* الساقان: بنطلون بحافة مثنية، جوارب بيضاء، حذاء رياضي أزرق بنعل ولسان أبيض */
  LEGS=[1,-1].map(s=>{const hip=new THREE.Group(),knee=new THREE.Group(),foot=new THREE.Group();hip.position.x=s*.1;
   hip.add(cy(.07,.062,PL.t1,pantsM,0,-PL.t1/2,0,14),sp(.066,pantsM,0,0,0));
   knee.position.y=-PL.t1;hip.add(knee);
-  knee.add(sp(.062,pantsM,0,0,0),cy(.06,.055,.2,pantsM,0,-.1,0,14),cy(.066,.066,.045,cuffM,0,-.2,0,14),cy(.045,.043,.12,whiteM,0,-.26,0,12));
+  const sock=cap(.043,.156,whiteM);sock.position.y=-.265;
+  knee.add(sp(.062,pantsM,0,0,0),cy(.06,.056,.2,pantsM,0,-.1,0,14),R3(tor(.062,.017,Math.PI*2,cuffM,0,-.205,0),Math.PI/2,0,0),sock);
   foot.position.y=-PL.s1;knee.add(foot);
-  foot.add(rbox(.13,.09,.27,.04,shoeM,0,-.005,-.045),rbox(.136,.03,.28,.012,whiteM,0,-.045,-.045),bx(.007,.035,.11,whiteM,.066,0,-.03,),bx(.007,.035,.11,whiteM,-.066,0,-.03),el(.04,.01,.05,whiteM,0,.04,-.08));
+  foot.add(rbox(.14,.095,.28,.045,shoeM,0,-.003,-.045),el(.062,.04,.06,whiteM,0,-.015,-.16),rbox(.146,.035,.29,.015,whiteM,0,-.047,-.045),bx(.007,.03,.1,whiteM,.07,.002,-.03),bx(.007,.03,.1,whiteM,-.07,.002,-.03),el(.045,.012,.055,whiteM,0,.045,-.08),el(.06,.04,.04,shoeDkM,0,.01,.07));
   player.add(hip);return{hip,knee,foot,s}});
- /* الذراعان: كمّ قصير أزرق وساعد بلون البشرة */
- ARMS=[1,-1].map(s=>{const A={s,up:cy(.054,.048,PL.ua,skinM,0,0,0,14),sl:cy(.064,.06,.14,shirtM,0,0,0,14),fo:cy(.046,.04,PL.fa,skinM,0,0,0,14),jt:sp(.048,skinM,0,0,0),ha:el(.065,.062,.066,skinM,0,0,0),sd:sp(.07,shirtM,0,0,0)};player.add(A.up,A.sl,A.fo,A.jt,A.ha,A.sd);return A});
+ /* الذراعان: كمّ قصير بحافة، وبقية الذراع والساعد بلون البشرة */
+ ARMS=[1,-1].map(s=>{const sl=cy(.066,.072,.14,shirtM,0,0,0,16);sl.add(R3(tor(.072,.01,Math.PI*2,hemM,0,.07,0),Math.PI/2,0,0));
+  const A={s,up:cap(.052,PL.ua,skinM),sl,fo:cap(.044,PL.fa,skinM),jt:sp(.046,skinM,0,0,0),ha:mkHand(s,skinM),sd:sp(.072,shirtM,0,0,0)};
+  player.add(A.up,A.sl,A.fo,A.jt,A.ha,A.sd);return A});
 }
 outline(player,.008);player.add(hand);
 
@@ -507,7 +519,7 @@ function armIK(A,S,T){
  tN.set(A.s*.8,-1,.3);tN.addScaledVector(tU,-tN.dot(tU));if(tN.lengthSq()<1e-4)tN.set(A.s,0,0);tN.normalize();
  tE.copy(S).addScaledVector(tU,a).addScaledVector(tN,h);
  tP.copy(S).addScaledVector(tU,d);
- segPlace(A.up,S,tE);segPlace(A.fo,tE,tP);tI.subVectors(tE,S).normalize().multiplyScalar(.14).add(S);segPlace(A.sl,S,tI);A.jt.position.copy(tE);A.ha.position.copy(tP);A.sd.position.copy(S)}
+ segPlace(A.up,S,tE);segPlace(A.fo,tE,tP);tI.subVectors(tE,S).normalize().multiplyScalar(.14).add(S);segPlace(A.sl,S,tI);A.jt.position.copy(tE);A.ha.quaternion.copy(A.fo.quaternion);A.ha.position.copy(tP).addScaledVector(tD.subVectors(tP,tE).normalize(),-.06);A.sd.position.copy(S)}
 /* وضع الجسم كل إطار: مشي، انحناء، قرفصاء، ذراعان، فرحة */
 function poseChar(dt,t){
  post+=(postT-post)*Math.min(1,dt*9);
