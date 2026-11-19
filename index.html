@@ -86,9 +86,9 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
   <section id="game" hidden>
     <div class="top"><button class="back" id="back" aria-label="رجوع"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button><div class="pb" id="lv"><i></i><span></span></div><div class="pb" id="left"><i></i><span></span></div></div>
     <div class="bar" id="bar" hidden><i></i></div>
-    <div class="say" id="say" hidden aria-live="polite"><span class="bot">🧭</span><p id="sayt"></p></div>
+    <div class="say" id="say" hidden aria-live="polite"><span class="bot">🧒</span><p id="sayt"></p></div>
     <button class="nv" id="nl" aria-label="دوران لليسار">◀</button><button class="nv" id="nr" aria-label="دوران لليمين">▶</button><button class="nv" id="dp" hidden>✋ اترك الغرض</button><button class="nv" id="mt" aria-label="كتم الصوت">🔊</button>
-    <div id="tp">تحرّك بالعصا، واسحب الشاشة للنظر. اضغط غرضًا عليه حلقة ذهبية لتمسكه، ثم اذهب به واضغط مكانه. وعند الانتهاء اخرج من الباب.</div>
+    <div id="tp">تحرّك بالعصا لتقود الشخصية، واسحب الشاشة لتدوير الكاميرا. اضغط غرضًا عليه حلقة ذهبية لتحمله الشخصية، ثم اضغط مكانه الصحيح. وعند الانتهاء اخرج من الباب.</div>
     <div id="room"></div>
     <div id="joy" aria-label="عصا الحركة"><i></i></div>
   </section>
@@ -451,81 +451,94 @@ function buildDoor(){
  doorLeaf=new THREE.Group();doorLeaf.position.set(X-.475,0,R-.06);
  doorLeaf.add(bx(.95,2.12,.06,dm,.475,1.06,0),bx(.7,.8,.02,pn,.475,1.55,-.035),bx(.7,.8,.02,pn,.475,.6,-.035),sp(.045,GOLD(),.83,1.0,-.06));outline(doorLeaf,.01);roomG.add(doorLeaf);
  const dh=new THREE.Mesh(new THREE.BoxGeometry(1.2,2.3,.6),hidMat());dh.position.set(X,1.15,R-.3);dh.userData.door=true;roomG.add(dh);doorHits=[dh]}
-const hand=new THREE.Group(),HIDLE=new THREE.Vector3(0,-.85,-.6),HCARRY=new THREE.Vector3(0,-.23,-.55);
-/* أوضاع اليدين: sp البعد عن المنتصف، roll ميل الكف للداخل، grip القبضة، yaw انحراف للداخل، pitch ميل للأسفل */
-const IP={sp:.3,roll:.08,grip:.3,yaw:.12,pitch:-.18},CP={sp:.1,roll:1.3,grip:.5,yaw:.04,pitch:-.1},OP={sp:.14,roll:1.1,grip:.04,yaw:.05,pitch:-.12};
-const HS=Object.assign({},IP),HANDS=[];
-const FM=[1,1.05,1.1,1.18];
-/* يد واحدة: side=1 يمين، side=-1 يسار (مرآة) */
-function buildHand(side){
- const root=new THREE.Group(),body=new THREE.Group();body.scale.x=side;root.add(body);root.rotation.order="YXZ";
- const skin=M(0xe9b794,.5),tipM=M(0xe3a086,.5),nail=M(0xf8e1da,.22),slv=M(0x1fb5a5,.85),cuff=M(0xffffff,.8);
- [skin,tipM].forEach(m=>{m.emissive.setHex(0x2a0d05);m.emissiveIntensity=.3});
- const put=(o,g)=>{o.castShadow=false;o.receiveShadow=false;(g||body).add(o);return o};
- const ell=(m,sx,sy,sz,x,y,z)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(1,20,14),m);o.scale.set(sx,sy,sz);o.position.set(x,y,z);return put(o)};
- /* مقطع مستدق يمتد نحو -z، وكرة عند المفصل لتنعيم الانحناء */
- const seg=(g,len,ra,rb,m)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(ra,rb,len,14),m||skin);o.rotation.x=Math.PI/2;o.scale.z=.92;o.position.z=-len/2;return put(o,g)};
- const jt=(g,r)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(r,12,10),skin);o.scale.z=.92;return put(o,g)};
- const nl=(g,sx,sz,y,z)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(1,12,8),nail);o.scale.set(sx,sx*.28,sz);o.position.set(0,y,z);return put(o,g)};
- /* الكف: جسم رئيسي + كعب الكف + منطقة الإبهام + ظهر اليد */
- ell(skin,.043,.0155,.046,0,0,-.004);
- ell(skin,.022,.013,.034,.025,-.003,.012);
- ell(skin,.02,.015,.03,-.027,-.007,.004);
- ell(skin,.044,.011,.044,0,.006,-.006);
- /* المعصم بيضاوي */
- const wr=new THREE.Mesh(new THREE.CylinderGeometry(.03,.034,.12,18),skin);wr.rotation.x=Math.PI/2;wr.scale.set(1.12,1,.85);wr.position.set(0,0,.085);put(wr);
- /* الكُم والسوار الأبيض */
- const sl=new THREE.Mesh(new THREE.CylinderGeometry(.052,.058,3.2,22),slv);sl.rotation.x=Math.PI/2;sl.position.set(0,0,1.75);put(sl);
- const cf=new THREE.Mesh(new THREE.CylinderGeometry(.056,.056,.07,22),cuff);cf.rotation.x=Math.PI/2;cf.position.set(0,0,.14);put(cf);
- for(let i=0;i<3;i++){const f=new THREE.Mesh(new THREE.TorusGeometry(.056,.006,6,20),slv);f.position.set(0,0,.3+i*.35);put(f)}
- /* الأصابع: ثلاث سلاميات مستدقة، نهايتها أحمر قليلًا مع ظفر */
- const fing=[];
- const finger=(x,z0,len,r,splay)=>{
-  const j1=new THREE.Group(),j2=new THREE.Group(),j3=new THREE.Group(),r1=r*.92,r2=r*.84,r3=r*.74;
-  j1.position.set(x,.003,z0);j1.rotation.y=splay;
-  jt(j1,r);seg(j1,len[0],r,r1);
-  j2.position.z=-len[0];jt(j2,r1);seg(j2,len[1],r1,r2);j1.add(j2);
-  j3.position.z=-len[1];jt(j3,r2);seg(j3,len[2],r2,r3,tipM);j2.add(j3);
-  const tp=new THREE.Mesh(new THREE.SphereGeometry(r3,12,10),tipM);tp.scale.set(1,.92,1.15);tp.position.z=-len[2];put(tp,j3);
-  nl(j3,r3*.62,len[2]*.5,r3*.8,-len[2]*.62);
-  ell(skin,r*1.05,r*1.02,r*1.1,x,.004,z0+.004);
-  body.add(j1);fing.push([j1,j2,j3])};
- finger(-.0315,-.044,[.04,.023,.019],.0088,.06);
- finger(-.0105,-.048,[.044,.027,.02],.0092,0);
- finger(.0105,-.045,[.041,.025,.02],.0087,-.05);
- finger(.0315,-.039,[.032,.018,.017],.0075,-.12);
- /* الإبهام: ثلاث سلاميات تدور نحو الأصابع عند القبض */
- const tb=new THREE.Group();tb.position.set(-.03,-.004,.01);tb.rotation.set(0,.8,-.3);body.add(tb);
- const t0=new THREE.Group(),t1=new THREE.Group(),t2=new THREE.Group();
- jt(t0,.0125);seg(t0,.04,.0125,.0112);tb.add(t0);
- t1.position.z=-.04;jt(t1,.0112);seg(t1,.032,.0112,.0102);t0.add(t1);
- t2.position.z=-.032;jt(t2,.0102);seg(t2,.027,.0102,.0088,tipM);t1.add(t2);
- const tt=new THREE.Mesh(new THREE.SphereGeometry(.0088,12,10),tipM);tt.scale.set(1,.92,1.15);tt.position.z=-.027;put(tt,t2);
- nl(t2,.0064,.0135,.0075,-.016);
- return{root,fing,thumb:[t0,t1,t2],tb,side}}
-/* قبضة اليد: 0 مفتوحة، 1 مقبوضة */
-function setGrip(H,g){
- H.fing.forEach((f,i)=>{const m=FM[i];f[0].rotation.x=-(.1+g*1.05)*m;f[1].rotation.x=-(.12+g*1.5)*m;f[2].rotation.x=-(.06+g*.9)*m});
- H.thumb[0].rotation.x=-(.02+g*.25);H.thumb[1].rotation.x=-(.05+g*.5);H.thumb[2].rotation.x=-(.06+g*.7);H.tb.rotation.y=.8-g*.35}
-[1,-1].forEach(s=>{const H=buildHand(s);HANDS.push(H);hand.add(H.root);setGrip(H,HS.grip)});
-hand.position.copy(HIDLE);hand.visible=false;cam.add(hand);scene.add(cam);
-/* تحريك اليدين كل إطار: تقترب للداخل وتميل الكفّان عند الحمل، وتنفتحان عند المدّ */
-function updateHands(dt,t){
- const T=carry?CP:reaching?OP:IP,k=Math.min(1,dt*11),still=carry||reaching;
- for(const p in IP)HS[p]+=(T[p]-HS[p])*k;
- const bob=still?0:Math.sin(walkT*9)*.004;
- HANDS.forEach((H,i)=>{const s=H.side,ph=i*1.7,sw=Math.sin(t*1.5+ph);
-  H.root.position.set(s*HS.sp,(still?0:(i?-.012:0))+sw*.003*(carry?.4:1)+bob,0);
-  H.root.rotation.set(HS.pitch+sw*.01,s*HS.yaw,-s*HS.roll);
-  setGrip(H,HS.grip+(still?0:Math.sin(t*1.2+ph)*.03))})}
-/* وضع الحمل المناسب لحجم الغرض: يقف الغرض بين اليدين ووجهه نحو اللاعب */
+/* ============ الشخصية: طفل بجسم كامل يمشي ويحمل الأغراض ويرتّبها ============ */
+const PL={t1:.31,s1:.31,sh:.4,ua:.3,fa:.28},ARM=PL.ua+PL.fa,LEG=PL.t1+PL.s1;
+const player=new THREE.Group();scene.add(player);
+/* مرساة الحمل: مجموعة داخل الشخصية، يعلّق بها الغرض وتتبعها الكفّان */
+const hand=new THREE.Group(),HIDLE=new THREE.Vector3(0,.8,-.22),HCARRY=new THREE.Vector3(0,1,-.48);
+/* sp: نصف المسافة بين الكفّين */
+const IP={sp:.2},CP={sp:.1},OP={sp:.14},HS=Object.assign({},IP);
+let pYaw=0,pYawT=0,post=0,postT=0,aw=0,cheerT=0,shakeV=0,hopV=0,mv=0,walkPh=0,lpx=0,lpz=0;
+const wrapA=a=>Math.atan2(Math.sin(a),Math.cos(a)),UPV=new THREE.Vector3(0,1,0);
+const torsoG=new THREE.Group(),headG=new THREE.Group();
+let LEGS,ARMS;
+{const skinM=M(0xf1c4a0,.6),shirtM=M(0x1fb5a5,.8),whiteM=M(0xffffff,.8),jeansM=M(0x3d5a98,.85),shoeM=M(0xe0574a,.7),hairM=M(0x3a2418,.7),eyeM=M(0x2a1a12,.5),pinkM=M(0xff9a9a,.9),noseM=M(0xe0a283,.7),mouthM=M(0x8a2f2f,.6);
+ skinM.emissive.setHex(0x2a0d05);skinM.emissiveIntensity=.15;
+ /* الجذع: بنطلون قصير ثم قميص بخط أبيض وعنق */
+ torsoG.add(rbox(.38,.14,.25,.06,jeansM,0,.06,0),rbox(.42,.36,.25,.09,shirtM,0,.28,0),rbox(.425,.05,.255,.02,whiteM,0,.27,0),cy(.05,.055,.09,skinM,0,.47,0,14));
+ /* الرأس: يتّجه وجهه نحو -z */
+ headG.position.set(0,.5,0);
+ headG.add(el(.205,.2,.2,skinM,0,.17,0),el(.045,.055,.04,skinM,-.2,.17,0),el(.045,.055,.04,skinM,.2,.17,0),el(.02,.018,.02,noseM,0,.15,-.198));
+ [-1,1].forEach(s=>headG.add(el(.03,.045,.022,eyeM,s*.075,.185,-.175),sp(.011,whiteM,s*.08,.2,-.193),el(.034,.02,.012,pinkM,s*.125,.12,-.15),R3(el(.04,.009,.01,hairM,s*.075,.235,-.168),0,0,-s*.2)));
+ const smile=tor(.04,.008,Math.PI,mouthM,0,.115,-.19);smile.rotation.z=Math.PI;headG.add(smile);
+ const cap=sh(new THREE.Mesh(new THREE.SphereGeometry(.222,28,16,0,Math.PI*2,0,Math.PI*.5),hairM));cap.position.set(0,.17,0);cap.rotation.x=.6;headG.add(cap);
+ const tuft=sh(new THREE.Mesh(new THREE.ConeGeometry(.045,.13,6),hairM));tuft.position.set(0,.4,.1);tuft.rotation.x=.6;headG.add(tuft);
+ headG.add(el(.12,.045,.05,hairM,0,.295,-.15));
+ torsoG.add(headG);player.add(torsoG);
+ /* الساقان: فخذ فركبة فساق فحذاء */
+ LEGS=[1,-1].map(s=>{const hip=new THREE.Group(),knee=new THREE.Group(),foot=new THREE.Group();hip.position.x=s*.1;
+  hip.add(cy(.07,.06,PL.t1,jeansM,0,-PL.t1/2,0,14),sp(.066,jeansM,0,0,0));
+  knee.position.y=-PL.t1;hip.add(knee);knee.add(sp(.06,jeansM,0,0,0),cy(.058,.05,PL.s1,jeansM,0,-PL.s1/2,0,14));
+  foot.position.y=-PL.s1;knee.add(foot);
+  foot.add(rbox(.13,.09,.27,.04,shoeM,0,-.005,-.045),rbox(.136,.03,.28,.012,whiteM,0,-.045,-.045));
+  player.add(hip);return{hip,knee,foot,s}});
+ /* الذراعان: قطعتان بطولين ثابتين، تُوضعان كل إطار بمعادلة مفصل الكوع */
+ ARMS=[1,-1].map(s=>{const A={s,up:cy(.056,.05,PL.ua,shirtM,0,0,0,14),fo:cy(.047,.042,PL.fa,skinM,0,0,0,14),jt:sp(.05,shirtM,0,0,0),ha:el(.062,.06,.064,skinM,0,0,0),sd:sp(.07,shirtM,0,0,0)};player.add(A.up,A.fo,A.jt,A.ha,A.sd);return A});
+}
+outline(player,.008);player.add(hand);
+
+const tS=new THREE.Vector3(),tT=new THREE.Vector3(),tE=new THREE.Vector3(),tN=new THREE.Vector3(),tU=new THREE.Vector3(),tD=new THREE.Vector3(),tI=new THREE.Vector3(),tA=new THREE.Vector3(),tP=new THREE.Vector3();
+function segPlace(m,a,b){m.position.addVectors(a,b).multiplyScalar(.5);m.quaternion.setFromUnitVectors(UPV,tD.subVectors(b,a).normalize())}
+/* ذراع بمفصلين: الكتف S نحو الهدف T، والكوع ينثني للخارج وللأسفل */
+function armIK(A,S,T){
+ const L1=PL.ua,L2=PL.fa;tU.subVectors(T,S);let d=tU.length();const mx=L1+L2-.004;
+ if(d>mx){tU.multiplyScalar(mx/d);d=mx}
+ if(d<.12){tU.set(0,-.12,0);d=.12}
+ tU.normalize();
+ const a=(L1*L1-L2*L2+d*d)/(2*d),h=Math.sqrt(Math.max(0,L1*L1-a*a));
+ tN.set(A.s*.8,-1,.3);tN.addScaledVector(tU,-tN.dot(tU));if(tN.lengthSq()<1e-4)tN.set(A.s,0,0);tN.normalize();
+ tE.copy(S).addScaledVector(tU,a).addScaledVector(tN,h);
+ tP.copy(S).addScaledVector(tU,d);
+ segPlace(A.up,S,tE);segPlace(A.fo,tE,tP);A.jt.position.copy(tE);A.ha.position.copy(tP);A.sd.position.copy(S)}
+/* وضع الجسم كل إطار: مشي، انحناء، قرفصاء، ذراعان، فرحة */
+function poseChar(dt,t){
+ post+=(postT-post)*Math.min(1,dt*9);
+ aw+=(((carry||reaching)?1:0)-aw)*Math.min(1,dt*10);
+ const tg=carry?CP:reaching?OP:IP;HS.sp+=(tg.sp-HS.sp)*Math.min(1,dt*11);
+ const u=post,phi=u*.95,beta=u,ch=Math.max(0,Math.min(1,cheerT*3)),ph=walkPh;
+ const hipY=LEG*Math.cos(phi)+.06,hop=(cheerT>0?Math.abs(Math.sin(t*8))*.12:0)+hopV;
+ player.position.set(P.x,hop+Math.abs(Math.sin(ph))*.025*mv,P.z);player.rotation.y=pYaw;
+ torsoG.position.set(0,hipY,0);torsoG.rotation.x=-beta+Math.sin(t*1.7)*.012;
+ headG.rotation.set(beta*.5,shakeV,0);
+ LEGS.forEach(L=>{const a=ph+(L.s>0?Math.PI:0),sw=Math.sin(a)*.65*mv,lf=Math.max(0,Math.cos(a))*.7*mv;
+  L.hip.position.y=hipY;L.hip.rotation.x=phi+sw;L.knee.rotation.x=-(2*phi+lf);L.foot.rotation.x=-(L.hip.rotation.x+L.knee.rotation.x)});
+ ARMS.forEach(A=>{const s=A.s;tS.set(s*.22,PL.sh,0).applyEuler(torsoG.rotation).add(torsoG.position);
+  const sa=Math.sin(ph+(s>0?0:Math.PI))*.6*mv+Math.sin(t*1.7+s)*.04;
+  tI.set(tS.x+s*.05,tS.y-ARM*.9*Math.cos(sa),tS.z-ARM*.9*Math.sin(sa));
+  tA.copy(hand.position);tA.x+=s*HS.sp;
+  tT.lerpVectors(tI,tA,aw);
+  if(ch>0){tI.set(tS.x+s*.14,tS.y+ARM*.9,tS.z-.04);tT.lerp(tI,ch)}
+  armIK(A,tS,tT)})}
+/* كاميرا خلف الكتف: تدور بالسحب، وتقترب إذا اصطدمت بجدار أو سقف */
+const CD=2.7,SHF=.5;
+function camFollow(){
+ const cp=Math.cos(pitch),dx=-Math.sin(yaw)*cp,dy=Math.sin(pitch),dz=-Math.cos(yaw)*cp;
+ const lim=R-.18,top=WH-.2,rx=Math.cos(yaw),rz=-Math.sin(yaw);
+ const bx0=clamp(P.x+rx*SHF,-lim,lim),bz0=clamp(P.z+rz*SHF,-lim,lim),by0=1.05;
+ const ox=-dx*CD,oy=-dy*CD,oz=-dz*CD,f=(b,o,l)=>o>1e-4?(b+o>l?(l-b)/o:1):o<-1e-4?(b+o<-l?(-l-b)/o:1):1;
+ let s=Math.min(1,f(bx0,ox,lim),f(bz0,oz,lim));
+ if(oy>1e-4&&by0+oy>top)s=Math.min(s,(top-by0)/oy);
+ if(oy<-1e-4&&by0+oy*s<.4)s=Math.min(s,(.4-by0)/oy);
+ s=clamp(s,.3,1);
+ cam.position.set(bx0+ox*s,by0+oy*s,bz0+oz*s);cam.rotation.set(pitch,yaw,0);cam.updateMatrixWorld()}
+/* وضع الحمل المناسب لحجم الغرض: يقف الغرض بين اليدين ووجهه نحو الكاميرا */
 function holdPose(it){
  const q=it.quaternion.clone();it.quaternion.identity();it.updateMatrixWorld(true);
  const b=new THREE.Box3().setFromObject(it.children[0]),s=b.getSize(new THREE.Vector3()),c=b.getCenter(new THREE.Vector3()).sub(it.position);
  it.quaternion.copy(q);it.updateMatrixWorld(true);
  const flat=s.y<.07,turn=s.x>s.z?Math.PI/2:0,Y=new THREE.Vector3(0,1,0);
  const qf=new THREE.Quaternion().setFromAxisAngle(Y,.2).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(flat?Math.PI/2:0,0,0))).multiply(new THREE.Quaternion().setFromAxisAngle(Y,turn));
- CP.sp=clamp(Math.min(s.x,s.z)/2+.03,.07,.2);CP.grip=flat?.42:.55;
+ CP.sp=clamp(Math.min(s.x,s.z)/2+.03,.07,.2);
  return{q:qf,p:new THREE.Vector3(0,0,-.075).sub(c.applyQuaternion(qf))}}
 
 /* ============ بناء الغرفة ============ */
@@ -611,11 +624,11 @@ function start(m,l,intro){
  mode=m;lvl=l;mistakes=0;over=false;clearInterval(timer);pausedRem=null;streak=0;fall.clear();tw.length=0;carry=null;busy=false;reaching=false;
  const cfg=L[l];total=left=cfg.n;show("game");fit();hl=l;hud();
  $("bar").hidden=m!=="time";
- say(m==="time"?"هيا بسرعة! الصواب يزيد الوقت، والخطأ يخصم 3 ثوانٍ.":"اسحب كل غرض إلى مكانه الصحيح. خذ وقتك!");
+ say(m==="time"?"هيا بسرعة! الصواب يزيد الوقت، والخطأ يخصم 3 ثوانٍ.":"قُد الشخصية: اضغط غرضًا لتحمله، ثم اضغط مكانه الصحيح. خذ وقتك!");
  buildRoom(cfg);say("📍 "+cfg.name+(l===0?" — الباب خلفك. بعد الترتيب يُفتح، فتنتقل إلى الغرفة التالية":" — رتّب كل غرض في مكانه"));
  while(itemsG.children.length){const c=itemsG.children[0];itemsG.remove(c);disposeG(c)}
  [...hand.children].forEach(c=>{if(c.userData&&c.userData.k){hand.remove(c);disposeG(c)}});hand.position.copy(HIDLE);hand.visible=false;Object.assign(HS,IP);$("dp").hidden=true;dpShown=false;
- yaw=tgtYaw=0;pitch=-.28;P.x=l?-1.5:0;P.z=l?R-1.3:0;if(l===0)rstars=[];
+ yaw=tgtYaw=0;pitch=-.42;P.x=l?-1.5:0;P.z=l?R-1.3:0;if(l===0)rstars=[];pYaw=pYawT=0;post=postT=0;aw=0;cheerT=0;shakeV=0;hopV=0;mv=0;lpx=P.x;lpz=P.z;
  const pools={};cfg.z.forEach(k=>pools[k]=shuffle(Z[k].items));
  const off=Math.random()*Math.PI*2,blocked=(x,z)=>OBS.some(b=>x>b.min.x-.3&&x<b.max.x+.3&&z>b.min.z-.3&&z<b.max.z+.3)||Math.hypot(x-P.x,z-P.z)<.8;
  for(let i=0;i<cfg.n;i++){
@@ -629,7 +642,7 @@ function start(m,l,intro){
 }
 
 /* ============ الحركة واليد والحمل ============ */
-const REACH=1.5,ZREACH=1.9,PR=.28;let PRn=PR;
+const REACH=2.2,ZREACH=2.7,PR=.28;let PRn=PR;
 const rc=new THREE.Raycaster(),tmpA=new THREE.Vector3(),tmpB=new THREE.Vector3(),floorPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
 let carry=null,busy=false,reaching=false,jx=0,jy=0,rotP=null,dStart={x:0,y:0},walkT=0;
 const K={};
@@ -659,12 +672,28 @@ function pushOut(p,r){const lim=R-.35,ok=(x,z)=>x>=-lim&&x<=lim&&z>=-lim&&z<=lim
   if(best){p.x=best[0];p.z=best[1]}}
  p.x=clamp(p.x,-lim,lim);p.z=clamp(p.z,-lim,lim)}
 
-/* مدّ اليد نحو نقطة في العالم ثم تنفيذ الدالة عند الوصول */
-function reach(wp,dur,cb,back=.12){busy=true;reaching=true;cam.updateMatrixWorld();
- const a=hand.position.clone(),b=cam.worldToLocal(wp.clone());b.z+=back;
- tween(dur,t=>{const e=t*t*(3-2*t);hand.position.lerpVectors(a,b,e)},()=>{cb&&cb()})}
-function retreat(pose,cb){const h0=hand.position.clone();
- tween(.25,t=>hand.position.lerpVectors(h0,pose,t),()=>{reaching=false;busy=false;cb&&cb()})}
+/* الشخصية تمشي نحو الهدف حتى تصبح على مسافة dist منه، ثم تنفّذ cb */
+const toLocal=(w,a)=>{const dx=w.x-P.x,dz=w.z-P.z,c=Math.cos(a),s=Math.sin(a);return new THREE.Vector3(dx*c-dz*s,w.y,dx*s+dz*c)};
+function stepTo(wp,dist,cb){
+ busy=true;PRn=PR;
+ const dx=wp.x-P.x,dz=wp.z-P.z,d=Math.hypot(dx,dz)||.001,q={x:P.x,z:P.z};
+ if(d>dist){q.x=wp.x-dx/d*dist;q.z=wp.z-dz/d*dist;pushOut(q,PR)}
+ pYawT=Math.atan2(-dx,-dz);
+ const x0=P.x,z0=P.z,dur=Math.max(.12,Math.hypot(q.x-x0,q.z-z0)/3);
+ tween(dur,t=>{const e=t*t*(3-2*t);P.x=x0+(q.x-x0)*e;P.z=z0+(q.z-z0)*e},cb)}
+/* أقل انحناء وقرفصاء تصل بهما اليدان إلى الهدف */
+function setPosture(tl){let best=1;
+ for(let u=0;u<=1.001;u+=.05){const phi=u*.95,hy=LEG*Math.cos(phi)+.06,sy=hy+PL.sh*Math.cos(u),sz=-PL.sh*Math.sin(u);
+  if(Math.hypot(tl.x,tl.y-sy,tl.z-sz)<=ARM*.94){best=u;break}}
+ postT=best}
+/* مدّ اليدين نحو نقطة في العالم ثم تنفيذ الدالة عند الوصول */
+function reach(wp,dur,cb,back=.12){busy=true;reaching=true;
+ const a=hand.position.clone();
+ pYawT=Math.atan2(P.x-wp.x,P.z-wp.z);
+ setPosture(toLocal(wp,pYawT));
+ tween(dur,t=>{const e=t*t*(3-2*t),b=toLocal(wp,pYaw);b.z+=back;hand.position.lerpVectors(a,b,e)},()=>{cb&&cb()})}
+function retreat(pose,cb){const h0=hand.position.clone();postT=0;
+ tween(.22,t=>hand.position.lerpVectors(h0,pose,t),()=>{reaching=false;busy=false;cb&&cb()})}
 
 function tryGrab(it){
  if(busy||over)return;
@@ -673,36 +702,38 @@ function tryGrab(it){
  if(distTo(it.position.x,it.position.z)>REACH){say("اقترب من "+(NM[u.e]||"الغرض")+" لتمسكه");return}
  fall.delete(it);snd(520,.06);
  /* اليدان تنفتحان بقدر عرض الغرض ثم تطبقان عليه من الجانبين */
- const gb=new THREE.Box3().setFromObject(it.children[0]),gs=gb.getSize(new THREE.Vector3());
- OP.sp=clamp(Math.abs(Math.cos(yaw))*gs.x/2+Math.abs(Math.sin(yaw))*gs.z/2+.05,.075,.21);
- reach(new THREE.Vector3(it.position.x,it.position.y+.1,it.position.z),.3,()=>{
+ const gb=new THREE.Box3().setFromObject(it.children[0]),gs=gb.getSize(new THREE.Vector3()),a=Math.atan2(P.x-it.position.x,P.z-it.position.z);
+ OP.sp=clamp(Math.abs(Math.cos(a))*gs.x/2+Math.abs(Math.sin(a))*gs.z/2+.05,.075,.21);
+ const tg=new THREE.Vector3(it.position.x,it.position.y+.1,it.position.z);
+ stepTo(tg,.5,()=>reach(tg,.26,()=>{
   const hp=holdPose(it);
   hand.attach(it);carry=it;u.rg.visible=false;
   const p0=it.position.clone(),q0=it.quaternion.clone();
   tween(.3,t=>{const e=t*t*(3-2*t);it.position.lerpVectors(p0,hp.p,e);it.quaternion.slerpQuaternions(q0,hp.q,e)});
   retreat(HCARRY);
-  say((NM[u.e]||"الغرض")+" في يديك. اذهب به إلى مكانه واضغط عليه.")})}
+  say((NM[u.e]||"الغرض")+" في يديه. اذهب به إلى مكانه واضغط عليه.")}))}
 
 function tryPlace(z){
  if(busy||over||!carry)return;
  if(distTo(z.g.position.x,z.g.position.z)>ZREACH){say("اقترب من "+Z[z.k].n+" أكثر");z.hintT=.6;return}
- const it=carry,slot=z.slots[z.n%z.slots.length].clone();
- if(it.userData.k!==z.k){reach(slot,.3,()=>wrong(it,z),.2);return}
- /* اليدان تحملان الغرض إلى مكانه، ثم تضعانه وتنفتحان وتنسحبان */
- reach(slot,.42,()=>{itemsG.attach(it);carry=null;correct(it,z,true);tween(.32,()=>{},()=>retreat(HIDLE))},.2)}
+ const it=carry,slot=z.slots[z.n%z.slots.length].clone();OP.sp=CP.sp;
+ if(it.userData.k!==z.k){stepTo(slot,.7,()=>reach(slot,.25,()=>wrong(it,z),.2));return}
+ /* الشخصية تمشي إلى الأثاث، تحمل الغرض إلى مكانه، ثم تضعه وتنسحب يداها */
+ stepTo(slot,.7,()=>reach(slot,.34,()=>{itemsG.attach(it);carry=null;correct(it,z,true);tween(.2,()=>{},()=>retreat(HIDLE))},.2))}
 
 function tryDrop(wp){
  if(busy||over||!carry)return;
  const it=carry;let x,z;
- if(wp&&distTo(wp.x,wp.z)<=ZREACH){x=wp.x;z=wp.z}else{x=P.x-Math.sin(yaw)*1.0;z=P.z-Math.cos(yaw)*1.0}
+ if(wp&&distTo(wp.x,wp.z)<=ZREACH){x=wp.x;z=wp.z}else{x=P.x-Math.sin(pYaw)*1.0;z=P.z-Math.cos(pYaw)*1.0}
  const q={x,z};pushOut(q,.2);
- reach(new THREE.Vector3(q.x,.25,q.z),.3,()=>{
+ const tg=new THREE.Vector3(q.x,.25,q.z);
+ stepTo(tg,.6,()=>reach(tg,.26,()=>{
   itemsG.attach(it);carry=null;it.userData.vy=0;fall.add(it);
   const x0=it.position.x,z0=it.position.z;tween(.3,t=>{it.position.x=x0+(q.x-x0)*t;it.position.z=z0+(q.z-z0)*t});
-  tween(.2,()=>{},()=>retreat(HIDLE));say("")})}
+  tween(.2,()=>{},()=>retreat(HIDLE));say("")}))}
 
 function doorHitAt(x,y){rc.setFromCamera(ndcOf(x,y),cam);return rc.intersectObjects(doorHits,false).length>0}
-function nearDoor(){const dx=-1.6-P.x,dz=R-P.z,d=Math.hypot(dx,dz);return d<=2.3&&(dx*-Math.sin(yaw)+dz*-Math.cos(yaw))/Math.max(d,.01)>.35}
+function nearDoor(){return Math.hypot(-1.6-P.x,R-P.z)<=2.3}
 function goNext(){
  if(busy||over||!doorOpen)return;const nl=lvl+1;busy=true;over=true;
  $("ftS").textContent="الغرفة "+(nl+1)+" من "+L.length;$("ftT").textContent=L[nl].name;
@@ -726,7 +757,7 @@ function tapAt(x,y){
 
 function interact(){
  if(busy||over)return;
- const fx=-Math.sin(yaw),fz=-Math.cos(yaw);let best=null,bd=99;
+ const fx=-Math.sin(pYaw),fz=-Math.cos(pYaw);let best=null,bd=99;
  if(!carry){
   itemsG.children.forEach(it=>{if(it.userData.placed)return;const dx=it.position.x-P.x,dz=it.position.z-P.z,d=Math.hypot(dx,dz);if(d<=REACH&&(dx*fx+dz*fz)/Math.max(d,.01)>.4&&d<bd){bd=d;best=it}});
   if(best)tryGrab(best);else if(doorOpen&&nearDoor())goNext();else say("لا يوجد غرض قريب أمامك");return}
@@ -736,7 +767,7 @@ function interact(){
 
 /* النظر بالسحب، والنقر للإمساك والوضع */
 cv.addEventListener("pointerdown",e=>{if(over)return;cv.setPointerCapture(e.pointerId);dStart={x:e.clientX,y:e.clientY};rotP={x:e.clientX,y:e.clientY}});
-cv.addEventListener("pointermove",e=>{if(!rotP)return;tgtYaw+=(e.clientX-rotP.x)*.006;pitch=clamp(pitch+(e.clientY-rotP.y)*.004,-1,.45);yaw=tgtYaw;rotP={x:e.clientX,y:e.clientY}});
+cv.addEventListener("pointermove",e=>{if(!rotP)return;tgtYaw+=(e.clientX-rotP.x)*.006;pitch=clamp(pitch+(e.clientY-rotP.y)*.004,-1.2,.1);yaw=tgtYaw;rotP={x:e.clientX,y:e.clientY}});
 const upc=e=>{if(!rotP)return;rotP=null;if(e.type==="pointerup"&&Math.hypot(e.clientX-dStart.x,e.clientY-dStart.y)<10)tapAt(e.clientX,e.clientY)};
 cv.addEventListener("pointerup",upc);cv.addEventListener("pointercancel",upc);
 
@@ -759,7 +790,7 @@ function correct(it,z,soft){
  tween(.6,t=>{const e=1-Math.pow(1-t,3);it.position.lerpVectors(p0,p1,e);it.position.y+=Math.sin(Math.PI*t)*(soft?.08:.35);it.scale.setScalar(s0+(1-s0)*e);it.quaternion.slerpQuaternions(q0,q1,e)},()=>it.position.copy(p1));
  tween(.35,t=>z.g.scale.setScalar(1+.04*Math.sin(Math.PI*t)),()=>z.g.scale.setScalar(1));
  starAt(z);sfx(z.k);setTimeout(()=>snd(880,.1),130);
- left--;hud();
+ tween(.4,t=>{hopV=Math.sin(Math.PI*t)*.1},()=>{hopV=0});left--;hud();
  if(left===0){say("");setTimeout(()=>finish(true),700)}
  else if(mode==="time"){streak++;const b=streak>=3?3:2;end=Math.min(end+b*1000,Date.now()+L[lvl].t*1000);say("+"+b+" ثوانٍ ⏱️"+(streak>=3?"  تتابع ×"+streak+" 🔥":""))}
  else say(PRAISE[Math.floor(Math.random()*PRAISE.length)]);
@@ -770,17 +801,17 @@ function wrong(it,z){
  say((NM[u.e]||"هذا الغرض")+" ليس هنا. "+WHY[u.k]+pen);
  if(mode==="relax"&&ZN[u.k])setTimeout(()=>{ZN[u.k].hintT=1.4},500);
  const h0=hand.position.clone();
- tween(.4,t=>{hand.position.copy(h0);hand.position.x+=Math.sin(t*24)*.05*(1-t)},()=>retreat(HCARRY));
+ tween(.4,t=>{hand.position.copy(h0);hand.position.x+=Math.sin(t*24)*.05*(1-t)},()=>retreat(HCARRY));tween(.6,t=>{shakeV=Math.sin(t*26)*.6*(1-t)},()=>{shakeV=0});
 }
 
 function calcStars(){if(mode==="relax")return mistakes<=1?3:mistakes<=3?2:1;const r=(end-Date.now())/1000/L[lvl].t;return r>.5?3:r>.2?2:1}
 function roomDone(){
- clearInterval(timer);$("bar").hidden=true;
+ clearInterval(timer);$("bar").hidden=true;cheerT=1.6;
  const st=calcStars();rstars[lvl]=st;saveBest(mode,lvl,st);snd(990,.3);unlockDoor();
  say("✨ "+L[lvl].name+" نظيفة! "+"⭐".repeat(st)+" الباب مفتوح، اخرج إلى "+L[lvl+1].name)}
 function finish(win){
  if(win&&lvl<L.length-1){roomDone();return}
- over=true;clearInterval(timer);$("res").hidden=false;const b1=$("b1");
+ over=true;if(win)cheerT=99;clearInterval(timer);$("res").hidden=false;const b1=$("b1");
  if(!win){$("rs").textContent="⏰";$("rt").textContent="انتهى الوقت!";$("rm").textContent="رتّبت "+(total-left)+" من "+total+" أغراض. حاول مرة ثانية، ستفعلها!";$("tip").textContent="نصيحة: ابدأ بالأغراض التي تعرف مكانها فورًا.";b1.textContent="أعد المحاولة";b1.onclick=()=>start(mode,lvl);return}
  const st=calcStars();rstars[lvl]=st;snd(990,.3);const rec=saveBest(mode,lvl,st);
  const tot=Math.max(1,Math.min(3,Math.round(rstars.reduce((s,v)=>s+(v||0),0)/L.length)));
@@ -794,21 +825,26 @@ let last=performance.now(),dpShown=false;
 function frame(now){
  const dt=Math.min(.05,(now-last)/1000),t=now/1000;last=now;
  if(!$("game").hidden){
+  /* الحركات المؤقتة أولًا: مشي الشخصية، مدّ اليدين، حركة الأغراض */
+  for(let i=tw.length-1;i>=0;i--){const a=tw[i];a.t+=dt;const u=Math.min(1,a.t/a.dur);a.fn(u);if(u>=1){tw.splice(i,1);a.done&&a.done()}}
   let mx=jx,my=jy;if(K.w||K.arrowup)my+=1;if(K.s||K.arrowdown)my-=1;if(K.d)mx+=1;if(K.a)mx-=1;
   if(K.arrowleft)tgtYaw+=dt*1.8;if(K.arrowright)tgtYaw-=dt*1.8;
   yaw+=(tgtYaw-yaw)*Math.min(1,dt*10);
   const ml=Math.hypot(mx,my);if(ml>1){mx/=ml;my/=ml}
-  if(ml>.01&&!over){const f=2*dt,fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw);
-   P.x+=(fx*my+rx*mx)*f;P.z+=(fz*my+rz*mx)*f;walkT+=dt*Math.min(1,ml)}
-  /* أثناء الحمل يتسع نصف قطر اللاعب بالتدريج كي لا يخترق الغرض المحمول الأثاث */
-  PRn+=((carry?PR+.22:PR)-PRn)*Math.min(1,dt*6);pushOut(P,PRn);
-  cam.position.set(P.x,1.45+(ml>.01?Math.sin(walkT*9)*.012:0),P.z);cam.rotation.set(pitch,yaw,0);cam.updateMatrixWorld();
+  /* العصا تحرّك الشخصية بالنسبة لاتجاه الكاميرا، والشخصية تلتفت نحو اتجاه سيرها */
+  if(ml>.01&&!over&&!busy){const f=2*dt,fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw),wx=fx*my+rx*mx,wz=fz*my+rz*mx;
+   P.x+=wx*f;P.z+=wz*f;pYawT=Math.atan2(-wx,-wz)}
+  /* أثناء الحمل يتسع نصف قطر اللاعب قليلًا كي لا يخترق الغرض المحمول الأثاث */
+  PRn+=(((carry&&!busy)?PR+.12:PR)-PRn)*Math.min(1,dt*6);pushOut(P,PRn);
+  pYaw+=wrapA(pYawT-pYaw)*Math.min(1,dt*(busy?20:12));
+  const spd=Math.hypot(P.x-lpx,P.z-lpz)/Math.max(dt,.001);lpx=P.x;lpz=P.z;
+  mv+=(clamp(spd/1.6,0,1)-mv)*Math.min(1,dt*12);walkPh+=spd*dt*5.5;
+  if(cheerT>0)cheerT-=dt;
   if(!reaching)hand.position.lerp(carry?HCARRY:HIDLE,Math.min(1,dt*8));
-  /* اليدان مخفيتان إلا عند المدّ للغرض وحمله */
-  hand.visible=!!carry||reaching||hand.position.y>-.7;
-  updateHands(dt,t);
+  hand.visible=true;
+  poseChar(dt,t);
+  camFollow();
   if(doorLeaf){doorO+=((doorOpen?1:0)-doorO)*Math.min(1,dt*5);doorLeaf.rotation.y=doorO*1.6;if(doorMat){doorMat.emissive.setHex(0xffc93c);doorMat.emissiveIntensity=doorOpen?.22+.18*Math.sin(t*5):0}}
-  for(let i=tw.length-1;i>=0;i--){const a=tw[i];a.t+=dt;const u=Math.min(1,a.t/a.dur);a.fn(u);if(u>=1){tw.splice(i,1);a.done&&a.done()}}
   for(const it of fall){const u=it.userData;u.vy-=14*dt;it.position.y+=u.vy*dt;it.rotation.x*=.9;it.rotation.z*=.9;
    if(it.position.y<=0){it.position.y=0;if(Math.abs(u.vy)>1.2)u.vy=-u.vy*.32;else{u.vy=0;fall.delete(it)}}}
   for(const k in ZN){const z=ZN[k],near=!!carry&&distTo(z.g.position.x,z.g.position.z)<=ZREACH;
