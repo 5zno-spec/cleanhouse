@@ -221,7 +221,7 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
   </section>
 
   <section id="game" hidden>
-    <div class="top"><button class="back" id="back" aria-label="رجوع"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button><div class="pb" id="lv"><i></i><span></span></div><div class="pb" id="left"><i></i><span></span></div></div>
+    <div class="top"><button class="back" id="back" aria-label="رجوع"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4M10 6l-6 6 6 6"/></svg></button><div class="pb" id="lv"><i></i><span></span></div><div class="pb" id="left"><i></i><span></span></div></div>
     <div class="bar" id="bar" hidden><i></i></div>
     <div class="say" id="say" hidden aria-live="polite"><img class="bot" src="img/boy.png" width="56" height="56" alt=""><div class="think" id="think" aria-hidden="true"><i class="t1"></i><i class="t2"></i><div class="cloud"><img id="thinkImg" alt="" width="64" height="64"></div></div><span class="arw" id="arw" hidden aria-hidden="true">⬆</span><p id="sayt" class="sr"></p></div>
     <button class="nv" id="nl" aria-label="دوران لليسار">◀</button><button class="nv" id="nr" aria-label="دوران لليمين">▶</button><button class="nv" id="dp" hidden>✋ اترك الغرض</button><button class="nv" id="mt" aria-label="كتم الصوت">🔊</button>
@@ -452,8 +452,11 @@ const MK={
  const s=smoothShape([[-.045,.125],[0,.1],[.045,.125],[.1,.12],[.165,.06],[.145,-.005],[.098,.012],[.095,-.125],[-.095,-.125],[-.098,.012],[-.145,-.005],[-.165,.06],[-.1,.12]]);
  return Gp(puff(s,.034,.012,m,0,.017,0,true),R3(tor(.036,.007,Math.PI*2,tr,0,.035,-.112),Math.PI/2,0,0),el(.03,.004,.03,ye,0,.036,.02),el(.014,.0045,.014,tr,0,.0365,.02))},
 [kPants]:()=>{const m=M(0x2a4d8f,.85),bd=M(0x1f3a6e,.85),lt=M(0x4a74c9,.85);
- const s=smoothShape([[-.1,.165],[.1,.165],[.105,.09],[.1,-.165],[.02,-.17],[0,-.03],[-.02,-.17],[-.1,-.165],[-.105,.09]]);
- return Gp(puff(s,.034,.012,m,0,.017,0,true),flatRect(.205,.036,.04,.014,bd,0,.02,-.15),sp(.011,GOLD(),0,.042,-.15),flatRect(.05,.04,.008,.003,lt,.055,.036,-.09),flatRect(.075,.02,.04,.008,lt,-.055,.02,.16),flatRect(.075,.02,.04,.008,lt,.055,.02,.16))},
+ /* بنطال طويل واضح: حزام في الأعلى، وساقان طويلتان منفصلتان، وثنية عند كل كاحل (لا يشبه الملابس الداخلية) */
+ const s=smoothShape([[-.1,-.2],[.1,-.2],[.106,-.08],[.088,.262],[.03,.268],[.012,-.005],[-.012,-.005],[-.03,.268],[-.088,.262],[-.106,-.08]]);
+ return Gp(puff(s,.034,.012,m,0,.017,0,true),flatRect(.21,.036,.045,.014,bd,0,.02,-.183),sp(.011,GOLD(),0,.042,-.183),
+  flatRect(.045,.04,.008,.003,lt,.055,.036,-.125),flatRect(.045,.04,.008,.003,lt,-.055,.036,-.125),
+  flatRect(.062,.02,.035,.008,lt,-.059,.02,.248),flatRect(.062,.02,.035,.008,lt,.059,.02,.248))},
 [kSock]:()=>{const m=M(0xff5d73,.85),wt=W0();
  const s=smoothShape([[-.035,.12],[.035,.12],[.037,-.015],[.1,-.045],[.118,-.09],[.075,-.125],[-.03,-.105],[-.055,-.04]]);
  return Gp(puff(s,.036,.013,m,0,.018,0,true),flatRect(.09,.032,.042,.012,wt,0,.021,-.105),flatRect(.075,.012,.04,.004,wt,0,.02,-.045),el(.026,.006,.02,wt,.092,.037,.082),el(.022,.006,.016,wt,-.012,.037,.098))},
@@ -915,6 +918,8 @@ document.addEventListener("visibilitychange",()=>{
  else if(pausedRem!==null){end=Date.now()+pausedRem;pausedRem=null;timer=setInterval(timerTick,100);say("تابع من حيث توقفت!")}});
 
 function start(m,l,intro){
+ /* خطوة «اللعب» في سجل المتصفح: زر الرجوع في الهاتف يعود إلى الغرف بدل الخروج من التطبيق */
+ try{if(!history.state||history.state.s!=="game")history.pushState({s:"game"},"")}catch(e){}
  hallRun=null;
  mode=m;lvl=l;mistakes=0;over=false;clearInterval(timer);pausedRem=null;streak=0;fall.clear();tw.length=0;carry=null;busy=false;reaching=false;
  const cfg=L[l];total=left=cfg.n;show("game");fit();hl=l;if(!intro)startL=l;hud();
@@ -1234,7 +1239,7 @@ function finish(win){
 /* ============ حلقة الرسم ============ */
 let last=performance.now(),dpShown=false;
 /* توفير البطارية: لا نرسم إلا عند الحاجة.
-   سرعة كاملة حين يتحرك شيء، ونحو 12 إطارًا في الثانية للمؤثرات الهادئة (نبض حلقة الغرض، توهج الباب)،
+   سرعة كاملة حين يتحرك شيء، ونحو 30 إطارًا في الثانية (حركة ناعمة) للمؤثرات الهادئة (نبض حلقة الغرض، توهج الباب)،
    ولا رسم إطلاقًا حين يسكن المشهد أو تغطيه نافذة النتيجة أو شاشة الانتقال (المتغيرات معرّفة قرب fit) */
 function frame(now){
  const dt=Math.min(.05,(now-last)/1000),t=now/1000;last=now;
@@ -1288,7 +1293,7 @@ function frame(now){
   if(needR||tw.length>0||fall.size>0||zMoving||Math.abs(doorO-(doorOpen?1:0))>.002)renderer.shadowMap.needsUpdate=true;
   const active=needR||sig!==lastSig||tw.length>0||fall.size>0||!!carry||reaching||hand.visible||zMoving||Math.abs(doorO-(doorOpen?1:0))>.002;
   const covered=!$("res").hidden||$("fade").classList.contains("on");
-  if(!covered&&(active||((ringOn||doorOpen)&&now-renderAt>80))){renderer.render(scene,cam);renderAt=now;lastSig=sig;needR=false}
+  if(!covered&&(active||((ringOn||doorOpen)&&now-renderAt>32))){renderer.render(scene,cam);renderAt=now;lastSig=sig;needR=false}
  }
  requestAnimationFrame(frame);
 }
@@ -1306,8 +1311,12 @@ const paintRooms=()=>{$("rooms").innerHTML=L.map((r,i)=>
   '<button class="room" data-i="'+i+'" style="--rc:'+hex(r.wall)+'"><span class="ri">'+RICON[r.id]+'</span><b>'+r.name+'</b><span class="go" aria-hidden="true">◀</span></button>').join("")};
 window.__paintRooms=paintRooms;
 $("rooms").onclick=e=>{const b=e.target.closest(".room");if(!b)return;selL=+b.dataset.i;try{localStorage.setItem("roomgame.start",String(selL))}catch(e){}start("relax",selL)};paintRooms();
-$("b2").onclick=()=>{clearInterval(timer);show("home")};
-$("back").onclick=()=>{clearInterval(timer);over=true;show("home")};
+/* العودة إلى الغرف: من زر الرجوع في الهاتف أو المتصفح، أو من زر الرجوع والقائمة داخل اللعبة (يستهلكان الخطوة نفسها) */
+const goHome=()=>{clearInterval(timer);over=true;show("home")};
+addEventListener("popstate",()=>{if(!$("game").hidden)goHome()});
+const backHome=()=>{if(history.state&&history.state.s==="game")history.back();else goHome()};
+$("b2").onclick=backHome;
+$("back").onclick=backHome;
 $("nl").onclick=()=>turn(90);$("nr").onclick=()=>turn(-90);$("dp").onclick=()=>tryDrop(null);
 addEventListener("keydown",e=>{
  if($("game").hidden||!$("res").hidden)return;
