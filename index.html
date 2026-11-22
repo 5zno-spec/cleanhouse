@@ -3,7 +3,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>رتّب شقتك</title>
+<title>بيتنا نظيف - لعبة ترتيب البيت للأطفال</title>
+<meta name="description" content="بيتنا نظيف: لعبة ثلاثية الأبعاد يتعلّم فيها الطفل ترتيب البيت، يمشي بين غرف الشقة ويضع كل غرض في مكانه الصحيح: الملابس في الخزانة والألعاب في صندوقها والطعام في الثلاجة.">
+<meta name="theme-color" content="#1f965a">
+<link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<!-- معاينة مواقع التواصل (واتساب، فيسبوك، تويتر، تيليجرام) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="بيتنا نظيف">
+<meta property="og:locale" content="ar_AR">
+<meta property="og:title" content="بيتنا نظيف - لعبة ترتيب البيت للأطفال">
+<meta property="og:description" content="بيتنا نظيف: لعبة ثلاثية الأبعاد يتعلّم فيها الطفل ترتيب البيت، يمشي بين غرف الشقة ويضع كل غرض في مكانه الصحيح: الملابس في الخزانة والألعاب في صندوقها والطعام في الثلاجة.">
+<meta property="og:image" content="img/og-image.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="شعار بيتنا نظيف: أمّ تحمل مكنسة وولد يحمل كتبًا، يضحكان، وتحتهما عبارة بيتنا نظيف">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="بيتنا نظيف - لعبة ترتيب البيت للأطفال">
+<meta name="twitter:description" content="بيتنا نظيف: لعبة ثلاثية الأبعاد يتعلّم فيها الطفل ترتيب البيت، يمشي بين غرف الشقة ويضع كل غرض في مكانه الصحيح: الملابس في الخزانة والألعاب في صندوقها والطعام في الثلاجة.">
+<meta name="twitter:image" content="img/og-image.jpg">
+<meta name="twitter:image:alt" content="شعار بيتنا نظيف: أمّ تحمل مكنسة وولد يحمل كتبًا، يضحكان، وتحتهما عبارة بيتنا نظيف">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#bfe3ff;--card:#fff8e6;--ink:#2b2218;--muted:#6b5f4c;--accent:#e0574a;--teal:#2fa36b;--sun:#f2b632;--wall:#f6d3c9;--base:#fff6e0;--edge:#2a1c12;
@@ -119,21 +139,62 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
 .chip{border-radius:99px;padding:7px 14px;font-weight:700;font-size:.95rem;color:var(--ink);background:var(--gl-bg);-webkit-backdrop-filter:var(--gl-blur);backdrop-filter:var(--gl-blur);border:1px solid var(--gl-line);box-shadow:var(--gl-shadow);transition:transform .12s,background .15s}
 .chip:active{transform:scale(.95)}
 .chip.on{color:#fff;background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,0) 55%),rgba(47,163,107,.85);box-shadow:0 6px 16px rgba(47,163,107,.3),inset 0 1px 0 rgba(255,255,255,.6)}
+/* ===== شاشة التحميل (كما في بقية الألعاب) ===== */
+#splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;background:linear-gradient(160deg,#eef9f1,#fdf7ea);transition:opacity .5s}
+#splash.out{opacity:0;pointer-events:none}
+.sp-logo{width:min(74vw,300px);height:auto;animation:spIn 1s cubic-bezier(.2,1.5,.4,1) both,spFloat 2.6s ease-in-out 1s infinite;filter:drop-shadow(0 12px 18px #1f965a22)}
+@keyframes spIn{0%{transform:scale(.4) rotate(-8deg);opacity:0}60%{transform:scale(1.08) rotate(2deg);opacity:1}100%{transform:none;opacity:1}}
+@keyframes spFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.sp-track{width:min(64vw,260px);height:14px;border-radius:99px;background:rgba(255,255,255,.7);border:1px solid rgba(31,150,90,.25);overflow:hidden;box-shadow:inset 0 1px 2px #0001}
+.sp-fill{width:100%;height:100%;border-radius:99px;background:linear-gradient(90deg,#1f965a,#6dbe45 50%,#f2b632);transform:scaleX(0);transform-origin:right;animation:spBar 3s linear forwards}
+@keyframes spBar{to{transform:scaleX(1)}}
+/* شعار وقار: صغير أسفل منتصف شاشة التحميل (الملوّن يناسب الخلفية الفاتحة) */
+.sp-dev{position:absolute;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));height:56px;width:auto;transform:translateX(-50%);opacity:0;animation:devIn .6s ease-out .5s forwards}
+@keyframes devIn{to{opacity:1}}
+@media(max-height:520px){#splash{padding-bottom:calc(54px + env(safe-area-inset-bottom));gap:16px}.sp-logo{width:min(56vw,220px,46vh)}.sp-dev{height:42px;bottom:calc(12px + env(safe-area-inset-bottom))}}
+@media(prefers-reduced-motion:reduce){.sp-logo{animation:none!important}.sp-fill{animation:spBar 3s linear forwards!important}.sp-dev{animation:none!important;opacity:1}}
+/* ===== الشاشة الرئيسية: الشعار وأزرار الغرف مكدّسة ===== */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.hero{padding:8px 0 0}.hlogo{width:min(62vw,250px);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 10px 16px #1f965a22)}
+.pickt{text-align:center;font-weight:700;color:var(--muted);margin:4px 0 10px}
+.rooms{display:flex;flex-direction:column;gap:12px;max-width:440px;margin:0 auto 24px}
+.room{--rc:#2fa36b;position:relative;overflow:hidden;display:flex;align-items:center;gap:14px;width:100%;text-align:right;padding:12px 16px;border-radius:22px;color:var(--ink);
+ background:var(--gl-bg);-webkit-backdrop-filter:var(--gl-blur);backdrop-filter:var(--gl-blur);border:1px solid var(--gl-line);border-inline-start:6px solid var(--rc);box-shadow:var(--gl-shadow);
+ transition:transform .22s cubic-bezier(.2,1.4,.4,1),box-shadow .22s,background .22s}
+.room .ri{flex:none;width:52px;height:52px;border-radius:16px;display:grid;place-items:center;font-size:1.9rem;background:color-mix(in srgb,var(--rc) 28%,white);box-shadow:inset 0 1px 0 #fff;transition:transform .3s cubic-bezier(.2,1.6,.4,1)}
+.room b{font-size:1.25rem;flex:1}.room .rs{font-size:.85rem;letter-spacing:1px;white-space:nowrap}
+.room .go{flex:none;font-size:1.1rem;color:var(--rc);transition:transform .22s}
+/* لمعة تعبر الزر عند المرور عليه */
+.room::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.75) 50%,transparent 70%);transform:translateX(120%);pointer-events:none}
+@media(hover:hover){.room:hover{transform:translateY(-3px) scale(1.02);background:linear-gradient(160deg,rgba(255,255,255,.8),rgba(255,255,255,.4));box-shadow:0 14px 30px color-mix(in srgb,var(--rc) 35%,transparent),inset 0 1px 0 #fff}
+ .room:hover .ri{transform:rotate(-8deg) scale(1.12)}.room:hover .go{transform:translateX(-5px)}.room:hover::after{animation:shine .7s ease-out}}
+.room:focus-visible{transform:translateY(-3px) scale(1.02)}
+.room:active{transform:scale(.97)}
+@keyframes shine{to{transform:translateX(-120%)}}
+/* ===== فقاعة الولد: رأسه في دائرة وبجانبه المطلوب، وسهم يشير إلى المكان ===== */
+#game .say{align-items:center}
+.say .bot{flex:none;width:56px;height:56px;border-radius:50%;border:3px solid #fff;box-shadow:0 4px 12px rgba(30,60,95,.25);background:#fff7e6;object-fit:cover}
+.say .arw{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:1.2rem;color:#fff;background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,0) 55%),rgba(47,163,107,.88);border:1px solid rgba(255,255,255,.7);box-shadow:0 4px 10px rgba(47,163,107,.35);transition:transform .15s linear}
+/* ===== فقاعة الثناء (كما في بقية الألعاب) ===== */
+.praise{position:fixed;top:calc(env(safe-area-inset-top,0px) + 130px);left:50%;transform:translateX(-50%);z-index:30;background:#ec5a9e;color:#fff;border-radius:99px;padding:6px 30px;font-size:2rem;font-weight:900;white-space:nowrap;box-shadow:0 5px 0 #c23a7b,0 12px 24px #0003;pointer-events:none;animation:pr 1.5s ease-out forwards}
+.praise.c1{background:#2ea6dd;box-shadow:0 5px 0 #1a7fb0,0 12px 24px #0003}.praise.c2{background:#6dbe45;box-shadow:0 5px 0 #4b952a,0 12px 24px #0003}.praise.c3{background:#e8413c;box-shadow:0 5px 0 #b8261f,0 12px 24px #0003}
+@keyframes pr{0%{transform:translate(-50%,10px) scale(.7);opacity:0}15%{transform:translate(-50%,0) scale(1.05);opacity:1}80%{opacity:1}100%{transform:translate(-50%,-14px);opacity:0}}
 </style>
 </head>
 <body>
+<div id="splash" role="progressbar" aria-label="جارٍ تحميل بيتنا نظيف"><img class="sp-logo" src="img/logo.webp" width="300" height="300" alt="بيتنا نظيف" fetchpriority="high"><div class="sp-track"><div class="sp-fill"></div></div><img class="sp-dev" src="img/dev-logo.png" width="40" height="56" alt="وقار"></div>
+<script>window.__t0=Date.now();window.hideSplash=function(){var s=document.getElementById("splash");if(!s||s.classList.contains("out"))return;s.classList.add("out");setTimeout(function(){s.remove()},550)};setTimeout(window.hideSplash,6000);</script>
 <div class="app">
   <section id="home">
-    <div class="hero"><h1>رتّب شقتك</h1></div>
-    <div class="pick"><span>ابدأ من:</span><div class="chips" id="rooms" role="radiogroup" aria-label="الغرفة التي تبدأ منها"></div></div>
-    <button class="big a" id="m1"><b>🏠 الشقة الفوضوية</b><span>بدون وقت، رتّب غرف الشقة واحدة بعد الأخرى وتعلّم أماكن الأشياء</span><em class="bs" id="bs1"></em></button>
-    <button class="big b" id="m2"><b>⏱️ ضد الساعة</b><span>رتّب كل غرفة قبل أن ينتهي وقتها</span><em class="bs" id="bs2"></em></button>
+    <div class="hero"><img class="hlogo" src="img/logo.webp" width="300" height="300" alt="بيتنا نظيف"><h1 class="sr">بيتنا نظيف</h1></div>
+    <p class="pickt">اختر الغرفة التي تبدأ منها</p>
+    <div class="rooms" id="rooms"></div>
   </section>
 
   <section id="game" hidden>
     <div class="top"><button class="back" id="back" aria-label="رجوع"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button><div class="pb" id="lv"><i></i><span></span></div><div class="pb" id="left"><i></i><span></span></div></div>
     <div class="bar" id="bar" hidden><i></i></div>
-    <div class="say" id="say" hidden aria-live="polite"><span class="bot">🧭</span><p id="sayt"></p></div>
+    <div class="say" id="say" hidden aria-live="polite"><img class="bot" src="img/boy.png" width="56" height="56" alt=""><p id="sayt"></p><span class="arw" id="arw" hidden aria-hidden="true">⬆</span></div>
     <button class="nv" id="nl" aria-label="دوران لليسار">◀</button><button class="nv" id="nr" aria-label="دوران لليمين">▶</button><button class="nv" id="dp" hidden>✋ اترك الغرض</button><button class="nv" id="mt" aria-label="كتم الصوت">🔊</button>
     <div id="tp">تحرّك بالعصا، واسحب الشاشة للنظر. اضغط غرضًا عليه حلقة ذهبية لتمسكه، ثم اذهب به واضغط مكانه. وعند الانتهاء اخرج من الباب.</div>
     <div id="room"></div>
@@ -185,7 +246,7 @@ Object.assign(NM,{[kCush]:"الوسادة الصغيرة",[kRemote]:"جهاز ا
 const WHY={closet:"الملابس تُحفظ في الخزانة لتبقى نظيفة ومرتبة.",shelf:"أدوات الدراسة مكانها الرف لتجدها وقت الواجب.",toys:"الألعاب مكانها صندوق الألعاب كي لا يتعثر بها أحد.",trash:"المهملات مكانها السلة حتى تبقى الغرفة نظيفة.",kitchen:"أدوات الأكل والشرب مكانها المطبخ."};
 Object.assign(WHY,{sofa:"الوسائد والمجلات وجهاز التحكم مكانها الأريكة.",bed:"الوسادة والبطانية والدمية مكانها السرير لتنام مرتاحًا.",cabinet:"أدوات النظافة مكانها خزانة الحمام.",laundry:"الملابس المتسخة مكانها سلة الغسيل.",fridge:"الطعام الطازج مكانه الثلاجة ليبقى صالحًا."});
 const TIPS=["الترتيب يساعدك تلاقي أغراضك بسرعة.","كل غرض له بيت، وبيته يحميه من الضياع.","الغرفة المرتبة تعطيك مساحة أكبر للّعب."];
-const PRAISE=["أحسنت! 🌟","ممتاز!","رائع جدًا!","بطل الترتيب! 💪","هكذا تمامًا!"];
+const PRAISE=["أحسنت","رائع","بارك الله فيك","بطل","عظيم","ممتاز"],PRAISE_FILES=["a7sant","rae3","barak-allah-feek","batal","3zeem","mmtaz"];
 const C6=[0xff5d73,0x35a7ff,0xffc93c,0x1fb5a5,0x9b5de5,0xff9f43];
 const Y={closet:0,kitchen:0,shelf:Math.PI/2,toys:-Math.PI/2,trash:Math.PI};
 
@@ -198,6 +259,9 @@ try{
  renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:"default"});
 }catch(err){$("home").insertAdjacentHTML("beforeend","<p>جهازك أو متصفحك لا يدعم الرسوم ثلاثية الأبعاد (WebGL).</p>");throw err}
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+/* السرعة: لا تُعاد الظلال كل إطار (كانت ~75% من وقت الرسم)، بل فقط حين يتحرك شيء يلقي ظلًا؛ المشي والنظر لا يحتاجانها */
+renderer.shadowMap.autoUpdate=false;
+const setCast=(o,v)=>o.traverse(m=>{if(m.isMesh&&m.material!==OUTL&&m.material.opacity!==0)m.castShadow=v});
 /* الهواتف (لمس): دقة ×1.5 بحدّ أقصى بدل ×2، فيقل عدد البكسلات المرسومة نحو النصف دون فرق ملحوظ على الشاشة الصغيرة */
 const MOBILE=matchMedia("(pointer:coarse)").matches;
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,MOBILE?1.5:2));
@@ -747,11 +811,29 @@ try{muted=localStorage.getItem("roomgame.mute")==="1"}catch(e){}
 const SK="roomgame.v2";let SV={relax:[0,0,0,0,0],time:[0,0,0,0,0]};
 try{const o=JSON.parse(localStorage.getItem(SK)||"null");if(o&&o.relax&&o.time)SV=o}catch(e){}
 const saveBest=(m,l,st)=>{const was=SV[m][l]||0;if(st<=was)return false;SV[m][l]=st;try{localStorage.setItem(SK,JSON.stringify(SV))}catch(e){}return was>0};
-function paintBest(){[["relax","bs1"],["time","bs2"]].forEach(([m,id])=>{const a=SV[m];$(id).textContent=a.some(x=>x)?"أفضل نتيجة: "+a.map((x,i)=>"م"+(i+1)+" "+(x?"⭐".repeat(x):"–")).join("   "):""})}
+function paintBest(){window.__paintRooms&&window.__paintRooms()}
 /* ترتيب الغرف يبدأ من الغرفة المختارة ويدور: التالية بعد الأخيرة هي الأولى، وينتهي اللعب حين نعود إلى غرفة البداية */
 const nextL=()=>(lvl+1)%L.length,ordOf=i=>(i-startL+L.length)%L.length;
 function hud(){const s=(id,t,p)=>{const e=$(id);e.querySelector("span").textContent=t;e.querySelector("i").style.width=clamp(p,0,100)+"%"};const od=ordOf(hl);s("lv",L[hl].name+" "+(od+1)+"/"+L.length,(od+(total-left)/total)/L.length*100);s("left","المتبقي: "+left,left/total*100)}
-const say=t=>{const b=$("say");if(!b)return;clearTimeout(sayT);if(!t){b.hidden=true;return}$("sayt").textContent=t;b.hidden=false;b.classList.remove("sh2");void b.offsetWidth;b.classList.add("sh2");sayT=setTimeout(()=>{b.hidden=true},4200)};
+/* فقاعة الولد تحت العدادات: تعرض رسالة مؤقتة (3.8 ث) ثم تعود إلى «المطلوب الآن» */
+let sayMsg="",sayUntil=0,sayChk=0;
+const say=t=>{sayMsg=t||"";sayUntil=t?performance.now()+3800:0;refreshSay()};
+function taskText(){try{
+ if(carry){const u=carry.userData;return "ضع "+(NM[u.e]||"الغرض")+" في "+Z[u.k].n}
+ if(doorOpen)return "أحسنت! اخرج من الباب إلى "+L[nextL()].name;
+ if(over)return "";
+ return left>0?"التقط غرضًا عليه حلقة ذهبية ("+left+" باقية)":""}catch(e){return ""}}
+function refreshSay(){const b=$("say");if(!b)return;const inGame=!$("game").hidden;
+ const m=sayMsg&&performance.now()<sayUntil?sayMsg:taskText();
+ b.hidden=!inGame||!m;if(b.hidden)return;
+ const p=$("sayt");if(p.textContent!==m){p.textContent=m;b.classList.remove("sh2");void b.offsetWidth;b.classList.add("sh2")}}
+/* فقاعة ثناء ملوّنة بعبارة عشوائية لا تتكرر مرتين متتاليتين، ويُسمع صوتها بعد نغمة الإنجاز */
+let lastPraise=-1,praiseEl=null,praiseT=0,praiseA=0;
+function praise(){let i;do{i=Math.floor(Math.random()*PRAISE.length)}while(i===lastPraise&&PRAISE.length>1);lastPraise=i;
+ clearTimeout(praiseT);clearTimeout(praiseA);if(praiseEl)praiseEl.remove();
+ const el=document.createElement("div");el.className="praise c"+(i%4);el.setAttribute("role","status");el.textContent=PRAISE[i]+"!";document.body.appendChild(el);praiseEl=el;
+ praiseT=setTimeout(()=>{el.remove();if(praiseEl===el)praiseEl=null},1900);
+ praiseA=setTimeout(()=>{if(muted)return;try{const a=new Audio("audio/praise/"+PRAISE_FILES[i]+".mp3");a.volume=.85;a.play().catch(()=>{})}catch(e){}},950)}
 const shuffle=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
 
 /* الصوت */
@@ -842,11 +924,11 @@ function tryGrab(it){
  OP.sp=clamp(Math.abs(Math.cos(yaw))*gs.x/2+Math.abs(Math.sin(yaw))*gs.z/2+.05,.075,.21);
  reach(new THREE.Vector3(it.position.x,it.position.y+.1,it.position.z),.3,()=>{
   const hp=holdPose(it);
-  hand.attach(it);carry=it;u.rg.visible=false;
+  hand.attach(it);carry=it;u.rg.visible=false;setCast(it,false);/* الغرض في اليد لا يلقي ظلًا حتى يوضع */
   const p0=it.position.clone(),q0=it.quaternion.clone();
   tween(.3,t=>{const e=t*t*(3-2*t);it.position.lerpVectors(p0,hp.p,e);it.quaternion.slerpQuaternions(q0,hp.q,e)});
   retreat(HCARRY);
-  say((NM[u.e]||"الغرض")+" في يديك. اذهب به إلى مكانه واضغط عليه.")})}
+  say("")})}
 
 function tryPlace(z){
  if(busy||over||!carry)return;
@@ -855,7 +937,7 @@ function tryPlace(z){
  /* اليدان تمتدّان إلى مدخل المكان (أمامه أو فوقه) لا إلى داخله، فلا تخترقان الأثاث */
  if(it.userData.k!==z.k){reach(ap,.3,()=>wrong(it,z),.2);return}
  /* اليدان تحملان الغرض إلى مدخل مكانه، ثم تضعانه وتنفتحان وتنسحبان */
- reach(ap,.38,()=>{itemsG.attach(it);carry=null;correct(it,z,true);tween(.32,()=>{},()=>retreat(HIDLE))},.2)}
+ reach(ap,.38,()=>{itemsG.attach(it);carry=null;setCast(it,true);correct(it,z,true);tween(.32,()=>{},()=>retreat(HIDLE))},.2)}
 
 /* أبعد نقطة خالية على الخط من اللاعب إلى (tx,tz)، على بعد .35 على الأقل كي يبقى الغرض ظاهرًا أمامه */
 function freeAt(x,z,r){const lim=R-.35;return x>=-lim&&x<=lim&&z>=-lim&&z<=lim&&!solids().some(b=>x>b.min.x-r&&x<b.max.x+r&&z>b.min.z-r&&z<b.max.z+r)}
@@ -880,7 +962,7 @@ function tryDrop(wp,onFloor){
     فيقع أمامها في جهة اللاعب، ولا يقع خلفها أو فوقها فيسقط من خلالها ويختفي */
  const q=onFloor&&freeAt(x,z,.2)?{x,z}:dropPoint(x,z);
  reach(new THREE.Vector3(q.x,.25,q.z),.3,()=>{
-  itemsG.attach(it);carry=null;it.userData.vy=0;fall.add(it);
+  itemsG.attach(it);carry=null;setCast(it,true);it.userData.vy=0;fall.add(it);
   const x0=it.position.x,z0=it.position.z;tween(.3,t=>{it.position.x=x0+(q.x-x0)*t;it.position.z=z0+(q.z-z0)*t});
   tween(.2,()=>{},()=>retreat(HIDLE));say("")})}
 
@@ -1060,7 +1142,7 @@ function correct(it,z,soft){
  left--;hud();
  if(left===0){say("");setTimeout(()=>finish(true),700)}
  else if(mode==="time"){streak++;const b=streak>=3?3:2;end=Math.min(end+b*1000,Date.now()+L[lvl].t*1000);say("+"+b+" ثوانٍ ⏱️"+(streak>=3?"  تتابع ×"+streak+" 🔥":""))}
- else say(PRAISE[Math.floor(Math.random()*PRAISE.length)]);
+ else praise();
 }
 function wrong(it,z){
  const u=it.userData;mistakes++;snd(220,.2);
@@ -1083,7 +1165,7 @@ function finish(win){
  const st=calcStars();rstars[lvl]=st;snd(990,.3);const rec=saveBest(mode,lvl,st);
  const tot=Math.max(1,Math.min(3,Math.round(rstars.reduce((s,v)=>s+(v||0),0)/L.length)));
  $("rs").textContent="⭐".repeat(tot)+"☆".repeat(3-tot);$("tip").textContent=TIPS[Math.floor(Math.random()*TIPS.length)];
- $("rt").textContent="🎉 شقتك نظيفة بالكامل!";$("rm").textContent="رتّبت غرفتك وغرفة المعيشة وغرفة النوم والحمام والمطبخ. أنت بطل الترتيب!"+(rec?" رقم قياسي جديد! 🏆":"");
+ $("rt").textContent="🎉 بيتنا نظيف بالكامل!";$("rm").textContent="رتّبت غرفتك وغرفة المعيشة وغرفة النوم والحمام والمطبخ. أنت بطل الترتيب!"+(rec?" رقم قياسي جديد! 🏆":"");
  b1.textContent="العب من جديد";b1.onclick=()=>start(mode,startL);
 }
 
@@ -1133,7 +1215,13 @@ function frame(now){
   itemsG.children.forEach(it=>{const u=it.userData;if(!u.rg)return;
    const on=!u.placed&&!carry&&it.position.y<.3&&distTo(it.position.x,it.position.z)<=REACH;u.rg.visible=on;if(on){ringOn=true;u.rg.scale.setScalar(1+.08*Math.sin(t*6))}});
   const sd=!!carry&&!busy;if(sd!==dpShown){$("dp").hidden=!sd;dpShown=sd}
+  /* المطلوب الآن في فقاعة الولد، والسهم يشير إلى مكان الغرض المحمول أو إلى الباب المفتوح */
+  if(now-sayChk>150){sayChk=now;refreshSay();
+   let tx=null,tz=null;if(carry&&ZN[carry.userData.k]){const g=ZN[carry.userData.k].g.position;tx=g.x;tz=g.z}else if(doorOpen){tx=-1.6;tz=R}
+   const aw=$("arw");if(tx===null){aw.hidden=true}else{const dx=tx-P.x,dz=tz-P.z,lx=dx*Math.cos(yaw)-dz*Math.sin(yaw),ly=-dx*Math.sin(yaw)-dz*Math.cos(yaw);
+    aw.hidden=false;aw.style.transform="rotate("+(Math.atan2(lx,ly)*180/Math.PI).toFixed(0)+"deg)"}}
   const sig=P.x.toFixed(3)+","+P.z.toFixed(3)+","+yaw.toFixed(4)+","+pitch.toFixed(4)+","+cam.position.y.toFixed(4);
+  if(needR||tw.length>0||fall.size>0||zMoving||Math.abs(doorO-(doorOpen?1:0))>.002)renderer.shadowMap.needsUpdate=true;
   const active=needR||sig!==lastSig||tw.length>0||fall.size>0||!!carry||reaching||hand.visible||zMoving||Math.abs(doorO-(doorOpen?1:0))>.002;
   const covered=!$("res").hidden||$("fade").classList.contains("on");
   if(!covered&&(active||((ringOn||doorOpen)&&now-renderAt>80))){renderer.render(scene,cam);renderAt=now;lastSig=sig;needR=false}
@@ -1141,18 +1229,19 @@ function frame(now){
  requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+setTimeout(()=>window.hideSplash&&window.hideSplash(),Math.max(0,3000-(Date.now()-(window.__t0||Date.now()))));
 
 /* ============ الأزرار ============ */
-paintBest();
 const paintMute=()=>{$("mt").textContent=muted?"🔇":"🔊";$("mt").setAttribute("aria-label",muted?"تشغيل الصوت":"كتم الصوت")};
 $("mt").onclick=()=>{muted=!muted;try{localStorage.setItem("roomgame.mute",muted?"1":"0")}catch(e){}paintMute()};paintMute();
 /* أزرار غرفة البداية: تُحفظ آخر غرفة اختارها اللاعب */
 const RICON={kids:"🧸",living:"🛋️",bed:"🛏️",bath:"🛁",kitchen:"🍳"};let selL=0;
 try{selL=Math.min(L.length-1,Math.max(0,+localStorage.getItem("roomgame.start")||0))}catch(e){}
-const paintRooms=()=>{$("rooms").innerHTML=L.map((r,i)=>'<button class="chip'+(i===selL?" on":"")+'" role="radio" aria-checked="'+(i===selL)+'" data-i="'+i+'">'+RICON[r.id]+" "+r.name+"</button>").join("")};
-$("rooms").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;selL=+b.dataset.i;try{localStorage.setItem("roomgame.start",String(selL))}catch(e){}paintRooms()};paintRooms();
-$("m1").onclick=()=>start("relax",selL);
-$("m2").onclick=()=>start("time",selL);
+const hex=c=>"#"+c.toString(16).padStart(6,"0");
+const paintRooms=()=>{$("rooms").innerHTML=L.map((r,i)=>{const st=SV.relax[i]||0;
+  return '<button class="room" data-i="'+i+'" style="--rc:'+hex(r.wall)+'"><span class="ri">'+RICON[r.id]+'</span><b>'+r.name+'</b><span class="rs" aria-label="أفضل نتيجة '+st+' من 3">'+(st?"⭐".repeat(st)+"☆".repeat(3-st):"")+'</span><span class="go" aria-hidden="true">◀</span></button>'}).join("")};
+window.__paintRooms=paintRooms;
+$("rooms").onclick=e=>{const b=e.target.closest(".room");if(!b)return;selL=+b.dataset.i;try{localStorage.setItem("roomgame.start",String(selL))}catch(e){}start("relax",selL)};paintRooms();
 $("b2").onclick=()=>{clearInterval(timer);show("home")};
 $("back").onclick=()=>{clearInterval(timer);over=true;show("home")};
 $("nl").onclick=()=>turn(90);$("nr").onclick=()=>turn(-90);$("dp").onclick=()=>tryDrop(null);
