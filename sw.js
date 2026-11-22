@@ -1,15 +1,13 @@
 /* بيتنا نظيف: تعمل اللعبة بلا إنترنت بعد أول زيارة.
    الصفحة تُجلب من الشبكة أولًا (فيرى اللاعب آخر تحديث) وتُعرض النسخة المحفوظة عند انقطاع الاتصال،
-   والصور والأصوات ومكتبة Three.js والخط تُقدَّم من الجهاز بعد حفظها.
+   والصور ومكتبة Three.js والخط تُقدَّم من الجهاز بعد حفظها.
    عند أي تعديل على اللعبة ارفع رقم VERSION ليُحذف الحفظ القديم عند اللاعبين. */
-const VERSION = 'v4';
+const VERSION = 'v5';
 const CACHE = 'beitna-' + VERSION;
 const CORE = [
   './', 'index.html', 'manifest.webmanifest',
-  'img/logo.webp', 'img/boy.png', 'img/dev-logo.png', 'img/favicon-32.png', 'img/apple-touch-icon.png',
+  'img/logo.webp', 'img/boy.png', 'img/girl.png', 'img/dev-logo.png', 'img/favicon-32.png', 'img/apple-touch-icon.png',
   'img/icon-192.png', 'img/icon-512.png', 'img/icon-maskable-512.png',
-  'audio/praise/a7sant.mp3', 'audio/praise/rae3.mp3', 'audio/praise/barak-allah-feek.mp3',
-  'audio/praise/batal.mp3', 'audio/praise/3zeem.mp3', 'audio/praise/mmtaz.mp3',
   'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js'
 ];
 

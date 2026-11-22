@@ -277,7 +277,7 @@ Object.assign(WHY,{sofa:"الوسائد والمجلات وجهاز التحكم
 /* شرح خاص بغرض بعينه (يتقدّم على شرح المكان) */
 const WHYI={[kCheeseBit]:"الطعام المكشوف الذي سقط على الأرض لا يُحفظ في الثلاجة، مكانه سلة المهملات."};
 const TIPS=["الترتيب يساعدك تلاقي أغراضك بسرعة.","كل غرض له بيت، وبيته يحميه من الضياع.","الغرفة المرتبة تعطيك مساحة أكبر للّعب."];
-const PRAISE=["أحسنت","رائع","بارك الله فيك","بطل","عظيم","ممتاز"],PRAISE_FILES=["a7sant","rae3","barak-allah-feek","batal","3zeem","mmtaz"];
+const PRAISE=["أحسنت","رائع","بارك الله فيك","بطل","عظيم","ممتاز"];
 const C6=[0xff5d73,0x35a7ff,0xffc93c,0x1fb5a5,0x9b5de5,0xff9f43];
 const Y={closet:0,kitchen:0,shelf:Math.PI/2,toys:-Math.PI/2,trash:Math.PI};
 
@@ -287,7 +287,7 @@ const room=$("room");
 let renderer;
 try{
  /* "default" بدل "high-performance": لا نجبر الحاسوب المحمول على كرت الشاشة المنفصل المستهلك للبطارية */
- renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:"default"});
+ renderer=new THREE.WebGLRenderer({antialias:!(matchMedia("(pointer:coarse)").matches&&(devicePixelRatio||1)>=2),powerPreference:"default"});
 }catch(err){$("home").insertAdjacentHTML("beforeend","<p>جهازك أو متصفحك لا يدعم الرسوم ثلاثية الأبعاد (WebGL).</p>");throw err}
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 /* السرعة: لا تُعاد الظلال كل إطار (كانت ~75% من وقت الرسم)، بل فقط حين يتحرك شيء يلقي ظلًا؛ المشي والنظر لا يحتاجانها */
@@ -846,7 +846,7 @@ function buildRoom(cfg){const zs=cfg.z;
 
 /* ============ الحالة والتحكم ============ */
 let mode,lvl,mistakes,left,timer,end,total,over=false,ac,streak=0,hl=0,startL=0,sel=null,muted=false,sayT=0,pausedRem=null;
-let yaw=0,tgtYaw=0,pitch=-.28;const P={x:0,z:0};
+let yaw=0,tgtYaw=0,pitch=-.28,tgtPitch=-.28,vMx=0,vMy=0;const P={x:0,z:0};
 const fall=new Set(),tw=[];
 const tween=(dur,fn,done)=>tw.push({t:0,dur,fn,done});
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -898,13 +898,12 @@ function refreshSay(){const b=$("say");if(!b)return;const inGame=!$("game").hidd
  b.hidden=!inGame||!key;if(b.hidden)return;
  const th=$("think");if(key!==thinkKey){thinkKey=key;try{$("thinkImg").src=snapshot(key,src,yv)}catch(e){}th.classList.remove("pop");void th.offsetWidth;th.classList.add("pop")}
  const p=$("sayt");if(p.textContent!==m){p.textContent=m;if(sayMsg&&m===sayMsg){th.classList.remove("nudge");void th.offsetWidth;th.classList.add("nudge")}}}
-/* فقاعة ثناء ملوّنة بعبارة عشوائية لا تتكرر مرتين متتاليتين، ويُسمع صوتها بعد نغمة الإنجاز */
-let lastPraise=-1,praiseEl=null,praiseT=0,praiseA=0;
+/* فقاعة ثناء ملوّنة بعبارة عشوائية لا تتكرر مرتين متتاليتين (دون صوت منطوق) */
+let lastPraise=-1,praiseEl=null,praiseT=0;
 function praise(){let i;do{i=Math.floor(Math.random()*PRAISE.length)}while(i===lastPraise&&PRAISE.length>1);lastPraise=i;
- clearTimeout(praiseT);clearTimeout(praiseA);if(praiseEl)praiseEl.remove();
+ clearTimeout(praiseT);if(praiseEl)praiseEl.remove();
  const el=document.createElement("div");el.className="praise c"+(i%4);el.setAttribute("role","status");el.textContent=PRAISE[i]+"!";document.body.appendChild(el);praiseEl=el;
- praiseT=setTimeout(()=>{el.remove();if(praiseEl===el)praiseEl=null},1900);
- praiseA=setTimeout(()=>{if(muted)return;try{const a=new Audio("audio/praise/"+PRAISE_FILES[i]+".mp3");a.volume=.85;a.play().catch(()=>{})}catch(e){}},950)}
+ praiseT=setTimeout(()=>{el.remove();if(praiseEl===el)praiseEl=null},1900);}
 const shuffle=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
 
 /* الصوت */
@@ -930,12 +929,13 @@ function start(m,l,intro){
  hallRun=null;
  mode=m;lvl=l;mistakes=0;over=false;clearInterval(timer);pausedRem=null;streak=0;fall.clear();tw.length=0;carry=null;busy=false;reaching=false;
  const cfg=L[l];total=left=cfg.n;show("game");fit();hl=l;if(!intro)startL=l;hud();
+ {const av=document.querySelector("#say .bot");if(av)av.src=ordOf(l)%2?"img/girl.png":"img/boy.png"}
  $("bar").hidden=m!=="time";
  say(m==="time"?"هيا بسرعة! الصواب يزيد الوقت، والخطأ يخصم 3 ثوانٍ.":"اسحب كل غرض إلى مكانه الصحيح. خذ وقتك!");
  buildRoom(cfg);say("📍 "+cfg.name+(!intro?" — الباب خلفك. بعد الترتيب يُفتح، فتنتقل إلى الغرفة التالية":" — رتّب كل غرض في مكانه"));
  while(itemsG.children.length){const c=itemsG.children[0];itemsG.remove(c);disposeG(c)}
  [...hand.children].forEach(c=>{if(c.userData&&c.userData.k){hand.remove(c);disposeG(c)}});hand.position.copy(HIDLE);hand.visible=false;Object.assign(HS,IP);$("dp").hidden=true;dpShown=false;
- yaw=tgtYaw=0;pitch=-.28;P.x=intro?-1.5:0;P.z=intro?R-1.3:0;if(!intro){rstars=[];startL=l}
+ yaw=tgtYaw=0;pitch=tgtPitch=-.28;vMx=vMy=0;P.x=intro?-1.5:0;P.z=intro?R-1.3:0;if(!intro){rstars=[];startL=l}
  const POOLS={bath:{trash:[kTissue,kCrump,kPaper]},kitchen:{trash:[kCheeseBit,kBanana,kPaper]}};
  const pools={};cfg.z.forEach(k=>pools[k]=shuffle((POOLS[cfg.id]&&POOLS[cfg.id][k])||Z[k].items));
  const off=Math.random()*Math.PI*2,blocked=(x,z)=>OBS.some(b=>x>b.min.x-.3&&x<b.max.x+.3&&z>b.min.z-.3&&z<b.max.z+.3)||Math.hypot(x-P.x,z-P.z)<.8;
@@ -1145,8 +1145,8 @@ cv.addEventListener("pointerdown",e=>{if(over)return;dStart={x:e.clientX,y:e.cli
  cv.setPointerCapture(e.pointerId);rotP={x:e.clientX,y:e.clientY}});
 cv.addEventListener("pointermove",e=>{
  if(isMouse(e)){const r=cv.getBoundingClientRect();mouseIn=true;mouseX=(e.clientX-r.left)/r.width;
-  if(playing()){tgtYaw-=(e.movementX||0)*.0035;pitch=clamp(pitch-(e.movementY||0)*.003,-1,.45)}return}
- if(!rotP)return;tgtYaw+=(e.clientX-rotP.x)*.006;pitch=clamp(pitch+(e.clientY-rotP.y)*.004,-1,.45);yaw=tgtYaw;rotP={x:e.clientX,y:e.clientY}});
+  if(playing()){tgtYaw-=(e.movementX||0)*.0035;tgtPitch=clamp(tgtPitch-(e.movementY||0)*.003,-1,.45)}return}
+ if(!rotP)return;tgtYaw+=(e.clientX-rotP.x)*.006;tgtPitch=clamp(tgtPitch+(e.clientY-rotP.y)*.004,-1,.45);rotP={x:e.clientX,y:e.clientY}});
 cv.addEventListener("pointerleave",e=>{if(isMouse(e))mouseIn=false});
 const upc=e=>{
  if(isMouse(e)){const t=mTap;mTap=false;if(t&&e.type==="pointerup"&&Math.hypot(e.clientX-dStart.x,e.clientY-dStart.y)<10)tapAt(e.clientX,e.clientY);return}
@@ -1258,8 +1258,10 @@ function frame(now){
   if(mouseIn&&playing()){if(mouseX<.06)tgtYaw+=dt*1.6*(1-mouseX/.06);else if(mouseX>.94)tgtYaw-=dt*1.6*((mouseX-.94)/.06)}
   /* البكرة: تُضاف إلى التقدم/التأخر بسرعة المشي نفسها حتى تنتهي المسافة */
   if(wheelD&&!over){const w=clamp(wheelD/(2*dt),-1,1);my+=w;wheelD-=w*2*dt;if(Math.abs(wheelD)<.005)wheelD=0}
-  yaw+=(tgtYaw-yaw)*Math.min(1,dt*10);
-  const ml=Math.hypot(mx,my);if(ml>1){mx/=ml;my/=ml}
+  yaw+=(tgtYaw-yaw)*Math.min(1,dt*14);pitch+=(tgtPitch-pitch)*Math.min(1,dt*14);
+  {const l0=Math.hypot(mx,my);if(l0>1){mx/=l0;my/=l0}}
+  const ka=Math.min(1,dt*9);vMx+=(mx-vMx)*ka;vMy+=(my-vMy)*ka;if(Math.abs(vMx)<.002)vMx=0;if(Math.abs(vMy)<.002)vMy=0;mx=vMx;my=vMy;
+  const ml=Math.hypot(mx,my);
   if(ml>.01&&!over){const f=2*dt,fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw);
    P.x+=(fx*my+rx*mx)*f;P.z+=(fz*my+rz*mx)*f;walkT+=dt*Math.min(1,ml)}
   /* أثناء الحمل يتسع نصف قطر اللاعب بالتدريج كي لا يخترق الغرض المحمول الأثاث */
