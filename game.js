@@ -393,7 +393,7 @@ function layoutRoom(cfg){
  if(id==="kids"){Zn("closet",mkCloset,0,FZ(.7),0);Zn("shelf",mkShelf,-R+.22,0,Math.PI/2);Zn("toys",mkToys,R-.4,TZ,-Math.PI/2);Zn("desk",mkDesk,.95,R-.36,Math.PI)}
  else if(id==="living"){Zn("sofa",mkSofa,0,FZ(.95),0);Zn("shelf",mkShelf,-R+.22,0,Math.PI/2);Zn("toys",mkToys,R-.4,TZ,-Math.PI/2);Zn("trash",mkTrash,2.55,-R+.45,0);
   mkDecor(dTV,1.2,R-.245,Math.PI);Zn("table",mkCoffee,0,-1.6,0)}
- else if(id==="bed"){Zn("bed",mkBed,1.5,-R+1.02,0);Zn("closet",mkCloset,-1.2,FZ(.7),0);Zn("shelf",mkShelf,-R+.22,0,Math.PI/2);Zn("trash",mkTrash,1.2,R-.4,Math.PI);mkDecor(dNight,.3,-R+.22,0)}
+ else if(id==="bed"){Zn("bed",mkBed,1.5,-R+1.02,0);Zn("closet",mkCloset,-1.95,FZ(.7),0);Zn("shelf",mkShelf,-R+.22,.35,Math.PI/2);Zn("trash",mkTrash,1.2,R-.4,Math.PI);mkDecor(dNight,.4,-R+.22,0)}
  else if(id==="bath"){Zn("cabinet",mkCabinet,.55,FZ(.5),0);Zn("laundry",mkLaundry,2.45,-2.55,0);Zn("trash",mkTrash,1.2,R-.4,Math.PI);
   mkDecor(dTub,-1.9,-R+.45,0);mkDecor(dToilet,-R+.3,1.1,Math.PI/2)}
  else{Zn("fridge",mkFridge,-2.55,FZ(.75),0);Zn("kitchen",mkKitchen,-.7,FZ(.65),0);Zn("trash",mkTrash,1.2,R-.4,Math.PI);
@@ -722,7 +722,7 @@ function start(m,l,intro,silent){
  hallRun=null;
  mode=m;lvl=l;mistakes=0;over=false;clearInterval(timer);pausedRem=null;streak=0;fall.clear();tw.length=0;carry=null;busy=false;reaching=false;
  const cfg=L[l];total=left=cfg.n;if(!silent){show("game");fit()}hl=l;if(!intro)startL=l;hud();
- {const av=document.querySelector("#say .bot");if(av)av.src=l%2?"img/girl.png":"img/boy.png"}
+ {const av=document.querySelector("#say .bot");if(av){av.src=l%2?"img/girl.png":"img/boy.png";/* البنت تنظر نحو اليسار */av.style.transform=l%2?"scaleX(-1)":""}}
  $("bar").hidden=m!=="time";
  say(m==="time"?"هيا بسرعة! الصواب يزيد الوقت، والخطأ يخصم 3 ثوانٍ.":"اسحب كل غرض إلى مكانه الصحيح. خذ وقتك!");
  buildRoom(cfg);doorOpen=true;rdone=false;roomLight=true;if(!silent)say("📍 "+cfg.name);
@@ -754,7 +754,7 @@ function start(m,l,intro,silent){
 }
 
 /* ============ الحركة واليد والحمل ============ */
-const REACH=1.5,ZREACH=1.9,PR=.28;let PRn=PR;
+const REACH=3.0,ZREACH=3.2,PR=.28;/* يكفي الاقتراب نصف المسافة؛ الغرض يطير إلى اليد ثم إلى مكانه */let PRn=PR;
 const rc=new THREE.Raycaster(),tmpA=new THREE.Vector3(),tmpB=new THREE.Vector3(),floorPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
 let carry=null,busy=false,reaching=false,jx=0,jy=0,rotP=null,dStart={x:0,y:0},walkT=0;
 const K={};
@@ -786,11 +786,37 @@ function pushOut(p,r){const lim=R-.35,ok=(x,z)=>x>=-lim&&x<=lim&&z>=-lim&&z<=lim
 
 /* مدّ اليد نحو نقطة في العالم ثم تنفيذ الدالة عند الوصول */
 function reach(wp,dur,cb,back=.12){busy=true;reaching=true;cam.updateMatrixWorld();
- const a=hand.position.clone(),b=cam.worldToLocal(wp.clone());b.z+=back;
+ const a=hand.position.clone(),b=cam.worldToLocal(wp.clone());b.z+=back;if(b.length()>.9)b.setLength(.9);
  tween(dur,t=>{const e=t*t*(3-2*t);hand.position.lerpVectors(a,b,e)},()=>{cb&&cb()})}
 function retreat(pose,cb){const h0=hand.position.clone();
- tween(.25,t=>hand.position.lerpVectors(h0,pose,t),()=>{reaching=false;busy=false;cb&&cb()})}
+ tween(.25,t=>hand.position.lerpVectors(h0,pose,t),()=>{reaching=false;busy=false;cb&&cb();if(pendTap&&!busy){const p=pendTap;pendTap=null;tapAt(p[0],p[1])}})}
 
+/* ============ المشي التلقائي بالنقر (مريح على الجوال: يمكن اللعب بالنقر فقط) ============ */
+let autoGo=null;
+/* هل الخط بين نقطتين خالٍ من الأثاث (بهامش نصف قطر اللاعب)؟ */
+function clearSeg(ax,az,bx,bz){const d=Math.hypot(bx-ax,bz-az),n=Math.max(2,Math.ceil(d/.1));for(let i=1;i<n;i++){const s=i/n;if(!freeAt(ax+(bx-ax)*s,az+(bz-az)*s,.24))return false}return true}
+/* يمشي إلى (tx,tz)؛ إن اعترضت الطريقَ قطعة أثاث يلتف عبر أحد أركانها */
+function walkTo(tx,tz,arrived,then){let wp=[{x:tx,z:tz}];
+ if(!inHall&&!clearSeg(P.x,P.z,tx,tz)){let best=null,bc=1e9;
+  for(const b of solids())for(const [cx,cz] of [[b.min.x-.45,b.min.z-.45],[b.max.x+.45,b.min.z-.45],[b.min.x-.45,b.max.z+.45],[b.max.x+.45,b.max.z+.45]]){
+   if(!freeAt(cx,cz,.24)||!clearSeg(P.x,P.z,cx,cz)||!clearSeg(cx,cz,tx,tz))continue;const c=Math.hypot(cx-P.x,cz-P.z)+Math.hypot(tx-cx,tz-cz);if(c<bc){bc=c;best={x:cx,z:cz}}}
+  if(best)wp=[best,{x:tx,z:tz}]}
+ autoGo={wp,arrived,then,best:1e9,st:0}}
+/* خطوة كل إطار: يلتفت نحو النقطة ويمشي إليها؛ لمس العصا أو الأزرار يلغيه، ويتوقف إن علق */
+function autoStep(dt,mx,my){if(!autoGo)return null;if(Math.abs(mx)+Math.abs(my)>.15){autoGo=null;return null}if(busy||over)return {mx:0,my:0};
+ if(autoGo.arrived()){const f=autoGo.then;autoGo=null;f&&f();return {mx:0,my:0}}
+ let w=autoGo.wp[0];if(autoGo.wp.length>1&&Math.hypot(w.x-P.x,w.z-P.z)<.3){autoGo.wp.shift();w=autoGo.wp[0]}
+ const dx=w.x-P.x,dz=w.z-P.z,fin=autoGo.wp[autoGo.wp.length-1],df=Math.hypot(fin.x-P.x,fin.z-P.z);
+ if(df<autoGo.best-.04){autoGo.best=df;autoGo.st=0}else{autoGo.st+=dt;if(autoGo.st>1.4){autoGo=null;return {mx:0,my:0}}}
+ const yT=Math.atan2(-dx,-dz),diff=((yT-tgtYaw+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;tgtYaw+=diff*Math.min(1,dt*7);
+ return {mx:0,my:Math.abs(diff)<1.1?clamp(Math.cos(diff)*1.1,0,1):0}}
+/* نقطة أمام قطعة الأثاث (حيث يقف اللاعب ليضع) */
+/* أفضل نقطة يقف عندها اللاعب ليضع: الأمام، أو أحد الجانبين إن كان الأمام مسدودًا (مثل الأريكة وأمامها المنضدة)؛
+   يُختار الأقرب إلى اللاعب من بين النقاط الخالية والقريبة كفاية من المكان */
+function frontOf(z){const p=z.hb.geometry.parameters,hz=z.hb.position.z||0,c=z.g.position;
+ const cand=[[0,hz+p.depth/2+.45],[-(p.width/2+.45),hz],[p.width/2+.45,hz]].map(([lx,lz])=>{const v=z.g.localToWorld(new THREE.Vector3(lx,0,lz));return{x:v.x,z:v.z}});
+ const ok=cand.filter(q=>freeAt(q.x,q.z,.45)&&Math.hypot(q.x-c.x,q.z-c.z)<=ZREACH-.15).sort((a,b)=>Math.hypot(a.x-P.x,a.z-P.z)-Math.hypot(b.x-P.x,b.z-P.z));
+ if(ok.length)return ok[0];const q=cand[0];pushOut(q,.3);return q}
 function tryGrab(it){
  if(busy||over)return;
  const u=it.userData;
@@ -938,7 +964,7 @@ function applyHallLight(){const on=hallLight;HALL.lights.forEach(l=>{if(l.userDa
 function hallLabels(){HALL.doors.forEach((d,i)=>{if(d.lb){d.lb.parent&&d.lb.parent.remove(d.lb);d.lb.material.map.dispose();d.lb.material.dispose()}
  /* أيقونة الغرفة فقط بلا كتابة، و✓ إن نظفت */
  const done=ROOMS[i]&&ROOMS[i].done,s=hallSide(i),z=hallZ(i),lb=label(RICON[L[i].id]+(done?" ✓":""),2.5);lb.position.set(s*(HW/2-.12),2.5,z);lb.scale.set(done?.62:.42,.26,1);HALL.sc.add(lb);d.lb=lb;d.glow.visible=false;d.leaf.rotation.y=0;d.op=0})}
-function enterHall(from){
+function enterHall(from){autoGo=null;
  HALL=HALL||buildHall();if(!HALL.hits)augmentHall();
  inHall=true;over=false;busy=false;carry=null;reaching=false;tw.length=0;hallLabels();applyHallLight();
  hand.visible=false;$("dp").hidden=true;dpShown=false;$("bar").hidden=true;
@@ -957,7 +983,7 @@ function exitRoom(){if(inHall||busy)return;if(carry){say("ضع الغرض في �
  if(history.state&&history.state.s==="room")history.back();else doExitRoom()}
 function hallTap(x,y){if(busy)return;rc.setFromCamera(ndcOf(x,y),cam);const h=rc.intersectObjects(HALL.hits,false)[0];if(!h)return;const u=h.object.userData;
  if(u.sw){if(Math.hypot(P.x-HW/2,P.z-(1.4-.75))<2.6){hallLight=!hallLight;applyHallLight();snd(hallLight?900:620,.05)}return}
- if(u.door!=null){if(Math.hypot(P.x-hallSide(u.door)*HW/2,P.z-hallZ(u.door))>2.4)return;enterRoom(u.door)}}
+ if(u.door!=null){const i=u.door,s=hallSide(i);if(Math.hypot(P.x-s*HW/2,P.z-hallZ(i))>3.2)return;enterRoom(i)}}
 /* حلقة الممر: المشي والنظر بنفس التحكم، والدخول بالمشي نحو باب جانبي */
 function hallFrame(dt,t,now){
  let mx=jx,my=jy;if(K.w||K.arrowup)my+=1;if(K.s||K.arrowdown)my-=1;if(K.d)mx+=1;if(K.a)mx-=1;
@@ -966,7 +992,7 @@ function hallFrame(dt,t,now){
  if(wheelD){const w=clamp(wheelD/(2*dt),-1,1);my+=w;wheelD-=w*2*dt;if(Math.abs(wheelD)<.005)wheelD=0}
  if(!busy){yaw+=(tgtYaw-yaw)*Math.min(1,dt*14)}pitch+=(tgtPitch-pitch)*Math.min(1,dt*14);
  {const l0=Math.hypot(mx,my);if(l0>1){mx/=l0;my/=l0}}
- const ka=Math.min(1,dt*9);vMx+=(mx-vMx)*ka;vMy+=(my-vMy)*ka;if(Math.abs(vMx)<.002)vMx=0;if(Math.abs(vMy)<.002)vMy=0;mx=vMx;my=vMy;
+ {const ag=autoStep(dt,mx,my);if(ag){mx=ag.mx;my=ag.my}}const ka=Math.min(1,dt*9);vMx+=(mx-vMx)*ka;vMy+=(my-vMy)*ka;if(Math.abs(vMx)<.002)vMx=0;if(Math.abs(vMy)<.002)vMy=0;mx=vMx;my=vMy;
  const ml=Math.hypot(mx,my);
  if(ml>.01&&!busy){const f=2*dt,fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw);P.x+=(fx*my+rx*mx)*f;P.z+=(fz*my+rz*mx)*f;walkT+=dt*Math.min(1,ml)}
  if(!busy){P.x=clamp(P.x,-HW/2+.32,HW/2-.32);P.z=clamp(P.z,hallZ(L.length-1)-1.4+.45,1.4-.45);
@@ -990,7 +1016,10 @@ function goNext(){
   setTimeout(()=>f.classList.remove("on"),1700)})}
 function unlockDoor(){doorOpen=true;
  doorLab=label("🚪 "+L[nextL()].name,2.6);doorLab.position.set(-1.6,2.6,R-.5);doorLab.scale.set(1.3,.34,1);roomG.add(doorLab);snd(660,.15)}
+let pendTap=null;
 function tapAt(x,y){
+ autoGo=null;
+ if(busy&&!inHall&&!over){pendTap=[x,y];return}
  if(inHall){hallTap(x,y);return}
  if(over||busy)return;
  if(roomSw){rc.setFromCamera(ndcOf(x,y),cam);if(rc.intersectObject(roomSw.hit,false).length&&distTo(-.82,R)<2.6){toggleRoomLight();return}}
@@ -998,7 +1027,7 @@ function tapAt(x,y){
  const z=zoneAt(x,y);
  if(z){if(carry)tryPlace(z);else say("احمل غرضًا أولًا، ثم اضغط على "+Z[z.k].n);return}
  if(doorHitAt(x,y)){
-  if(distTo(-1.6,R)>2.6){say("اقترب من الباب");return}
+  if(distTo(-1.6,R)>3.2){say("اقترب من الباب");return}
   exitRoom();return}
  if(carry){rc.setFromCamera(ndcOf(x,y),cam);
   /* أول ما يصيبه النقر في الغرفة: إن كان أعلى من الأرض فهو أثاث أو جدار، والأرض المقابلة له مخفية خلفه */
@@ -1032,7 +1061,7 @@ cv.addEventListener("pointermove",e=>{
 cv.addEventListener("pointerleave",e=>{if(isMouse(e))mouseIn=false});
 const upc=e=>{
  if(isMouse(e)){const t=mTap;mTap=false;if(t&&e.type==="pointerup"&&Math.hypot(e.clientX-dStart.x,e.clientY-dStart.y)<10)tapAt(e.clientX,e.clientY);return}
- if(!rotP)return;rotP=null;if(e.type==="pointerup"&&Math.hypot(e.clientX-dStart.x,e.clientY-dStart.y)<10)tapAt(e.clientX,e.clientY)};
+ if(!rotP)return;rotP=null;if(e.type==="pointerup"&&Math.hypot(e.clientX-dStart.x,e.clientY-dStart.y)<18)tapAt(e.clientX,e.clientY)};
 cv.addEventListener("pointerup",upc);cv.addEventListener("pointercancel",upc);
 /* بكرة الفأرة: للأعلى تقدّم وللأسفل تأخّر (كل درجة ≈ 0.4 م، تُمشى بسلاسة في حلقة الإطار مع الاصطدام بالأثاث) */
 cv.addEventListener("wheel",e=>{if(!playing())return;e.preventDefault();
@@ -1145,7 +1174,7 @@ function frame(now){
   if(wheelD&&!over){const w=clamp(wheelD/(2*dt),-1,1);my+=w;wheelD-=w*2*dt;if(Math.abs(wheelD)<.005)wheelD=0}
   yaw+=(tgtYaw-yaw)*Math.min(1,dt*14);pitch+=(tgtPitch-pitch)*Math.min(1,dt*14);
   {const l0=Math.hypot(mx,my);if(l0>1){mx/=l0;my/=l0}}
-  const ka=Math.min(1,dt*9);vMx+=(mx-vMx)*ka;vMy+=(my-vMy)*ka;if(Math.abs(vMx)<.002)vMx=0;if(Math.abs(vMy)<.002)vMy=0;mx=vMx;my=vMy;
+  {const ag=autoStep(dt,mx,my);if(ag){mx=ag.mx;my=ag.my}}const ka=Math.min(1,dt*9);vMx+=(mx-vMx)*ka;vMy+=(my-vMy)*ka;if(Math.abs(vMx)<.002)vMx=0;if(Math.abs(vMy)<.002)vMy=0;mx=vMx;my=vMy;
   const ml=Math.hypot(mx,my);
   if(ml>.01&&!over){const f=2*dt,fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw);
    P.x+=(fx*my+rx*mx)*f;P.z+=(fz*my+rz*mx)*f;walkT+=dt*Math.min(1,ml)}

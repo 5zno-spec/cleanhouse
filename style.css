@@ -52,7 +52,7 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
 #dp{left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);width:auto;padding:0 20px;border-radius:99px;font-size:1rem}
 #joy{position:absolute;z-index:20;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 76px);width:130px;height:130px;border-radius:50%;background:var(--card);opacity:.6;touch-action:none;box-shadow:0 4px 0 rgba(0,0,0,.18)}
 #joy i{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:var(--teal);box-shadow:0 3px 0 rgba(0,0,0,.2);pointer-events:none}
-#tp{position:absolute;z-index:20;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 74px);background:var(--card);padding:6px 14px;border-radius:99px;font-weight:700;pointer-events:none;width:max-content;max-width:calc(100% - 24px);text-align:center;box-sizing:border-box;animation:tpf 7s forwards}
+#tp{position:absolute;z-index:20;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 222px);background:var(--card);padding:6px 14px;border-radius:99px;font-weight:700;pointer-events:none;width:max-content;max-width:calc(100% - 24px);text-align:center;box-sizing:border-box;animation:tpf 7s forwards}
 @keyframes tpf{0%,75%{opacity:1}100%{opacity:0}}
 .say{transition:opacity .25s,transform .25s}.say.sh2{animation:sayin .3s}@keyframes sayin{from{opacity:0;transform:translateY(-8px)}}
 #game::after{content:"";position:absolute;inset:0;z-index:10;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 68%,rgba(40,25,10,.2) 100%)}
