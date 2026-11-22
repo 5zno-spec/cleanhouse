@@ -247,7 +247,7 @@ catch(err){$("home").insertAdjacentHTML("beforeend","<p>تعذّر تحميل ا
 try{document.fonts&&document.fonts.load("700 28px Cairo")}catch(e){}
 
 /* ============ بيانات اللعبة ============ */
-const kCush="\u{1F6CB}",kRemote="\u{1F4FA}",kMag="\u{1F4F0}",kPillow="\u{1F6CC}",kBlank="\u{1F9E3}",kBrush="\u{1FAA5}",kSoap="\u{1F9FC}",kShamp="\u{1F9F4}",kRoll="\u{1F9FB}",kApple="\u{1F34E}",kCheese="\u{1F9C0}",kCarrot="\u{1F955}",kEgg="\u{1F95A}",kTissue="\u{1F927}",kCrump="\u{1F5D2}";
+const kCush="\u{1F6CB}",kRemote="\u{1F4FA}",kMag="\u{1F4F0}",kPillow="\u{1F6CC}",kBlank="\u{1F9E3}",kBrush="\u{1FAA5}",kSoap="\u{1F9FC}",kShamp="\u{1F9F4}",kRoll="\u{1F9FB}",kApple="\u{1F34E}",kCheese="\u{1F9C0}",kCarrot="\u{1F955}",kEgg="\u{1F95A}",kTissue="\u{1F927}",kCrump="\u{1F5D2}",kCheeseBit="\u{1F9C8}";
 const Z={
  closet:{n:"الخزانة",items:["👕","👖","🧦","🧢","🧥","👗"]},
  shelf:{n:"الرف",items:["📖","✏️","🎒","📒","🖍️","📐"]},
@@ -271,9 +271,11 @@ const L=[
  {id:"kitchen",name:"المطبخ",z:["fridge","kitchen","trash"],n:10,t:70,wall:0xffc977,floor:"tile",rug:0}
 ];
 const NM={"👕":"القميص","👖":"البنطال","🧦":"الجورب","🧢":"القبعة","🧥":"المعطف","👗":"الفستان","📖":"الكتاب","✏️":"القلم","🎒":"الحقيبة","📒":"الدفتر","🖍️":"ألوان الشمع","📐":"المسطرة","🧸":"الدمية","🚗":"السيارة","🧩":"قطع التركيب","⚽":"الكرة","🪁":"الطائرة الورقية","🎲":"النرد","🍌":"قشر الموز","🧃":"علبة العصير الفارغة","🥤":"الكوب الفارغ","📄":"الورقة الممزقة","🥛":"كوب الحليب","🥣":"الوعاء","🍴":"الملاعق","☕":"الفنجان"};
-Object.assign(NM,{[kTissue]:"المنديل المستعمل",[kCrump]:"الورقة المكرمشة",[kCush]:"الوسادة الصغيرة",[kRemote]:"جهاز التحكم",[kMag]:"المجلة",[kPillow]:"المخدّة",[kBlank]:"البطانية",[kBrush]:"فرشاة الأسنان",[kSoap]:"الصابونة",[kShamp]:"زجاجة الشامبو",[kRoll]:"لفة المناديل",[kApple]:"التفاحة",[kCheese]:"قطعة الجبن",[kCarrot]:"الجزرة",[kEgg]:"البيض"});
+Object.assign(NM,{[kCheeseBit]:"قطعة الجبن المكشوفة",[kTissue]:"المنديل المستعمل",[kCrump]:"الورقة المكرمشة",[kCush]:"الوسادة الصغيرة",[kRemote]:"جهاز التحكم",[kMag]:"المجلة",[kPillow]:"المخدّة",[kBlank]:"البطانية",[kBrush]:"فرشاة الأسنان",[kSoap]:"الصابونة",[kShamp]:"زجاجة الشامبو",[kRoll]:"لفة المناديل",[kApple]:"علبة الزبادي",[kCheese]:"علبة الجبن",[kCarrot]:"زجاجة العصير",[kEgg]:"كرتونة البيض"});
 const WHY={closet:"الملابس تُحفظ في الخزانة لتبقى نظيفة ومرتبة.",shelf:"أدوات الدراسة مكانها الرف لتجدها وقت الواجب.",toys:"الألعاب مكانها صندوق الألعاب كي لا يتعثر بها أحد.",trash:"المهملات مكانها السلة حتى تبقى الغرفة نظيفة.",kitchen:"أدوات الأكل والشرب مكانها المطبخ."};
-Object.assign(WHY,{sofa:"الوسائد والمجلات وجهاز التحكم مكانها الأريكة.",bed:"الوسادة والبطانية والدمية مكانها السرير لتنام مرتاحًا.",cabinet:"أدوات النظافة مكانها خزانة الحمام.",laundry:"الملابس المتسخة مكانها سلة الغسيل.",fridge:"الطعام الطازج مكانه الثلاجة ليبقى صالحًا."});
+Object.assign(WHY,{sofa:"الوسائد والمجلات وجهاز التحكم مكانها الأريكة.",bed:"الوسادة والبطانية والدمية مكانها السرير لتنام مرتاحًا.",cabinet:"أدوات النظافة مكانها خزانة الحمام.",laundry:"الملابس المتسخة مكانها سلة الغسيل.",fridge:"الطعام المغلّف مكانه الثلاجة ليبقى صالحًا."});
+/* شرح خاص بغرض بعينه (يتقدّم على شرح المكان) */
+const WHYI={[kCheeseBit]:"الطعام المكشوف الذي سقط على الأرض لا يُحفظ في الثلاجة، مكانه سلة المهملات."};
 const TIPS=["الترتيب يساعدك تلاقي أغراضك بسرعة.","كل غرض له بيت، وبيته يحميه من الضياع.","الغرفة المرتبة تعطيك مساحة أكبر للّعب."];
 const PRAISE=["أحسنت","رائع","بارك الله فيك","بطل","عظيم","ممتاز"],PRAISE_FILES=["a7sant","rae3","barak-allah-feek","batal","3zeem","mmtaz"];
 const C6=[0xff5d73,0x35a7ff,0xffc93c,0x1fb5a5,0x9b5de5,0xff9f43];
@@ -552,10 +554,15 @@ Object.assign(MK,{
 [kSoap]:()=>{const m=M(0xffd36a,.5),w=W0();return Gp(rbox(.085,.032,.055,.014,m,0,.016,0),el(.02,.003,.012,w,0,.0335,0))},
 [kShamp]:()=>{const m=M(0x4aa3a0,.5),w=W0(),c=M(0xd24a3a,.6);return Gp(cy(.032,.032,.14,m,0,.07,0,20),cy(.0325,.0325,.045,w,0,.07,0,20),cy(.016,.018,.03,c,0,.155,0,14),R3(cy(.004,.004,.03,c,.014,.178,0,8),0,0,Math.PI/2))},
 [kRoll]:()=>{const p=M(0xf3ead2,.9),k=M(0x2b2f3a,.9);return Gp(cy(.05,.05,.1,p,0,.05,0,24),cy(.018,.018,.102,k,0,.05,0,12))},
-[kApple]:()=>{const m=M(0xd24a3a,.5),g=M(0x58704f,.7),b=M(0x5a3a1e,.8);return Gp(el(.058,.052,.058,m,0,.052,0),cy(.004,.004,.026,b,0,.11,0,6),R3(el(.022,.004,.011,g,.016,.112,0),0,0,.4))},
-[kCheese]:()=>{const m=M(0xf2c14a,.6),h=M(0xc89a2a,.7),c=sh(new THREE.Mesh(new THREE.CylinderGeometry(.075,.075,.055,3),m));c.position.y=.0275;c.rotation.y=.4;return Gp(c,el(.012,.004,.012,h,0,.058,0),el(.008,.004,.008,h,.025,.058,.02))},
-[kCarrot]:()=>{const m=M(0xe8892b,.7),g=M(0x58704f,.8),c=sh(new THREE.Mesh(new THREE.ConeGeometry(.025,.17,12),m));c.rotation.z=-Math.PI/2;c.position.set(0,.025,0);return Gp(c,R3(cy(.004,.007,.04,g,-.105,.03,.01,6),0,0,Math.PI/2+.3),R3(cy(.004,.007,.04,g,-.1,.03,-.012,6),0,0,Math.PI/2-.3))},
-[kEgg]:()=>{const m=M(0xf3e6c4,.7);return Gp(el(.034,.046,.034,m,-.03,.046,0),el(.034,.046,.034,m,.03,.046,.012))}
+[kApple]:()=>{/* علبة زبادي مغلقة بغطاء معدني */const w=M(0xffffff,.5),f=M(0xcfd6e4,.3),lb=M(0x35a7ff,.6);
+ return Gp(cy(.045,.036,.085,w,0,.0425,0,24),cy(.047,.047,.008,f,0,.089,0,24),cy(.0455,.039,.03,lb,0,.045,0,24))},
+[kCheese]:()=>{/* علبة جبن مغلقة: قاعدة وغطاء ملوّن وملصق */const b=M(0xfff3c4,.5),ld=M(0x1fb5a5,.5),ch=M(0xf2c14a,.6);
+ return Gp(bx(.14,.05,.1,b,0,.025,0),bx(.146,.018,.106,ld,0,.059,0),bx(.06,.002,.04,ch,0,.069,0))},
+[kCarrot]:()=>{/* زجاجة عصير مغلقة بسدادة */const gl=M(0xffb347,.3),cp=M(0x58a05a,.5),lb=M(0xffffff,.6);
+ return Gp(cy(.032,.032,.13,gl,0,.065,0,20),cy(.018,.03,.03,gl,0,.145,0,20),cy(.014,.014,.022,cp,0,.17,0,16),cy(.0325,.0325,.045,lb,0,.07,0,20))},
+[kEgg]:()=>{/* كرتونة بيض مغلقة */const c=M(0xc9b89a,.9),dk=M(0xa8977a,.9);const g=Gp(bx(.17,.05,.1,c,0,.025,0),bx(.174,.02,.104,dk,0,.06,0));
+ for(let i=0;i<3;i++)for(let j=0;j<2;j++)g.add(el(.022,.01,.022,c,-.055+i*.055,.072,-.025+j*.05));return g},
+[kCheeseBit]:()=>{const m=M(0xf2c14a,.6),h=M(0xc89a2a,.7),c=sh(new THREE.Mesh(new THREE.CylinderGeometry(.075,.075,.055,3),m));c.position.y=.0275;c.rotation.y=.4;return Gp(c,el(.012,.004,.012,h,0,.058,0),el(.008,.004,.008,h,.025,.058,.02))},
 });
 function mkItem(e,k){const g=new THREE.Group();g.add(outline((MK[e]||MK[kPaper])()));const hs=new THREE.Mesh(new THREE.SphereGeometry(.2,10,8),hidMat());hs.position.y=.12;g.add(hs);const rg=new THREE.Mesh(new THREE.RingGeometry(.2,.25,28),new THREE.MeshBasicMaterial({color:0xffc93c,transparent:true,opacity:.9,side:THREE.DoubleSide,depthWrite:false}));rg.rotation.x=-Math.PI/2;rg.position.y=.012;rg.visible=false;g.add(rg);g.userData={k,e,placed:false,rg};return g}
 
@@ -929,7 +936,7 @@ function start(m,l,intro){
  while(itemsG.children.length){const c=itemsG.children[0];itemsG.remove(c);disposeG(c)}
  [...hand.children].forEach(c=>{if(c.userData&&c.userData.k){hand.remove(c);disposeG(c)}});hand.position.copy(HIDLE);hand.visible=false;Object.assign(HS,IP);$("dp").hidden=true;dpShown=false;
  yaw=tgtYaw=0;pitch=-.28;P.x=intro?-1.5:0;P.z=intro?R-1.3:0;if(!intro){rstars=[];startL=l}
- const POOLS={bath:{trash:[kTissue,kCrump,kPaper]}};
+ const POOLS={bath:{trash:[kTissue,kCrump,kPaper]},kitchen:{trash:[kCheeseBit,kBanana,kPaper]}};
  const pools={};cfg.z.forEach(k=>pools[k]=shuffle((POOLS[cfg.id]&&POOLS[cfg.id][k])||Z[k].items));
  const off=Math.random()*Math.PI*2,blocked=(x,z)=>OBS.some(b=>x>b.min.x-.3&&x<b.max.x+.3&&z>b.min.z-.3&&z<b.max.z+.3)||Math.hypot(x-P.x,z-P.z)<.8;
  for(let i=0;i<cfg.n;i++){
@@ -1214,7 +1221,7 @@ function correct(it,z,soft){
 function wrong(it,z){
  const u=it.userData;mistakes++;snd(220,.2);
  let pen="";if(mode==="time"){streak=0;end-=3000;pen="  −3 ثوانٍ ⏱️"}
- say((NM[u.e]||"هذا الغرض")+" ليس هنا. "+WHY[u.k]+pen);
+ say((NM[u.e]||"هذا الغرض")+" ليس هنا. "+(WHYI[u.e]||WHY[u.k])+pen);
  if(mode==="relax"&&ZN[u.k])setTimeout(()=>{ZN[u.k].hintT=1.4},500);
  const h0=hand.position.clone();
  tween(.4,t=>{hand.position.copy(h0);hand.position.x+=Math.sin(t*24)*.05*(1-t)},()=>retreat(HCARRY));
