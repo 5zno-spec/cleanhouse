@@ -8,13 +8,20 @@
 <meta name="theme-color" content="#1f965a">
 <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="بيتنا نظيف">
 <!-- معاينة مواقع التواصل (واتساب، فيسبوك، تويتر، تيليجرام) -->
+<link rel="canonical" href="https://clhouse.vercel.app/">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://clhouse.vercel.app/">
 <meta property="og:site_name" content="بيتنا نظيف">
 <meta property="og:locale" content="ar_AR">
 <meta property="og:title" content="بيتنا نظيف - لعبة ترتيب البيت للأطفال">
 <meta property="og:description" content="بيتنا نظيف: لعبة ثلاثية الأبعاد يتعلّم فيها الطفل ترتيب البيت، يمشي بين غرف الشقة ويضع كل غرض في مكانه الصحيح: الملابس في الخزانة والألعاب في صندوقها والطعام في الثلاجة.">
-<meta property="og:image" content="img/og-image.jpg">
+<meta property="og:image" content="https://clhouse.vercel.app/img/og-image.jpg">
+<meta property="og:image:secure_url" content="https://clhouse.vercel.app/img/og-image.jpg">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -22,7 +29,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="بيتنا نظيف - لعبة ترتيب البيت للأطفال">
 <meta name="twitter:description" content="بيتنا نظيف: لعبة ثلاثية الأبعاد يتعلّم فيها الطفل ترتيب البيت، يمشي بين غرف الشقة ويضع كل غرض في مكانه الصحيح: الملابس في الخزانة والألعاب في صندوقها والطعام في الثلاجة.">
-<meta name="twitter:image" content="img/og-image.jpg">
+<meta name="twitter:image" content="https://clhouse.vercel.app/img/og-image.jpg">
 <meta name="twitter:image:alt" content="شعار بيتنا نظيف: أمّ تحمل مكنسة وولد يحمل كتبًا، يضحكان، وتحتهما عبارة بيتنا نظيف">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
@@ -157,7 +164,7 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .hero{padding:8px 0 0}.hlogo{width:min(62vw,250px);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 10px 16px #1f965a22)}
 .pickt{text-align:center;font-weight:700;color:var(--muted);margin:4px 0 10px}
-.rooms{display:flex;flex-direction:column;gap:12px;max-width:440px;margin:0 auto 24px}
+.rooms{display:flex;flex-direction:column;gap:12px;width:min(100%,290px);margin:0 auto 24px}
 .room{--rc:#2fa36b;position:relative;overflow:hidden;display:flex;align-items:center;gap:14px;width:100%;text-align:right;padding:12px 16px;border-radius:22px;color:var(--ink);
  background:var(--gl-bg);-webkit-backdrop-filter:var(--gl-blur);backdrop-filter:var(--gl-blur);border:1px solid var(--gl-line);border-inline-start:6px solid var(--rc);box-shadow:var(--gl-shadow);
  transition:transform .22s cubic-bezier(.2,1.4,.4,1),box-shadow .22s,background .22s}
@@ -179,14 +186,36 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
 .praise{position:fixed;top:calc(env(safe-area-inset-top,0px) + 130px);left:50%;transform:translateX(-50%);z-index:30;background:#ec5a9e;color:#fff;border-radius:99px;padding:6px 30px;font-size:2rem;font-weight:900;white-space:nowrap;box-shadow:0 5px 0 #c23a7b,0 12px 24px #0003;pointer-events:none;animation:pr 1.5s ease-out forwards}
 .praise.c1{background:#2ea6dd;box-shadow:0 5px 0 #1a7fb0,0 12px 24px #0003}.praise.c2{background:#6dbe45;box-shadow:0 5px 0 #4b952a,0 12px 24px #0003}.praise.c3{background:#e8413c;box-shadow:0 5px 0 #b8261f,0 12px 24px #0003}
 @keyframes pr{0%{transform:translate(-50%,10px) scale(.7);opacity:0}15%{transform:translate(-50%,0) scale(1.05);opacity:1}80%{opacity:1}100%{transform:translate(-50%,-14px);opacity:0}}
+/* ===== فقاعة التفكير: دوائر صغيرة تخرج من رأس الولد إلى غيمة فيها صورة المطلوب فقط ===== */
+#game .say p{flex:none}
+.think{position:relative;display:flex;align-items:center;pointer-events:none}
+.think .t1,.think .t2{display:block;flex:none;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(30,60,95,.18)}
+/* الفقاعتان الصغيرتان تصعدان من رأس الولد نحو الغيمة: الأصغر ملاصقة للرأس، والأكبر أعلى قليلًا */
+.think .t1{width:8px;height:8px;margin-inline:0 4px;transform:translateY(4px)}
+.think .t2{width:14px;height:14px;margin-inline-end:4px;transform:translateY(-6px)}
+.think .cloud{width:80px;height:68px;display:grid;place-items:center;border-radius:50%;transform:translateY(-10px);
+ background:radial-gradient(circle at 38% 30%,#fff 0 55%,#f4f8fc);border:2px solid #fff;box-shadow:0 6px 16px rgba(30,60,95,.22)}
+.think .cloud img{width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 3px 3px rgba(0,0,0,.18))}
+.think.pop .cloud{animation:thPop .35s cubic-bezier(.2,1.6,.4,1)}
+.think.nudge .cloud{animation:thNudge .5s}
+@keyframes thPop{0%{transform:translateY(-10px) scale(.6);opacity:.3}100%{transform:translateY(-10px);opacity:1}}
+@keyframes thNudge{0%,100%{transform:translateY(-10px)}20%{transform:translateY(-10px) translateX(-5px) rotate(-4deg)}40%{transform:translateY(-10px) translateX(5px) rotate(4deg)}60%{transform:translateY(-10px) translateX(-3px)}80%{transform:translateY(-10px) translateX(3px)}}
+/* لمعة بطيئة على شعار الواجهة: شريط ضوء يعبر الشعار كل بضع ثوانٍ، محصور في شكل الشعار */
+.hlw{position:relative;display:block;width:min(62vw,250px);margin:0 auto}
+.hlw .hlogo{width:100%}
+.hlw::after{content:"";position:absolute;inset:0;pointer-events:none;
+ background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.85) 48%,rgba(255,255,255,.95) 50%,rgba(255,255,255,.85) 52%,transparent 65%) no-repeat;background-size:250% 100%;background-position:150% 0;
+ -webkit-mask:url(img/logo.webp) center/contain no-repeat;mask:url(img/logo.webp) center/contain no-repeat;animation:hlShine 5.5s ease-in-out 1.2s infinite}
+@keyframes hlShine{0%{background-position:150% 0}55%,100%{background-position:-60% 0}}
+@media(prefers-reduced-motion:reduce){.hlw::after{animation:none;opacity:0}}
 </style>
 </head>
 <body>
 <div id="splash" role="progressbar" aria-label="جارٍ تحميل بيتنا نظيف"><img class="sp-logo" src="img/logo.webp" width="300" height="300" alt="بيتنا نظيف" fetchpriority="high"><div class="sp-track"><div class="sp-fill"></div></div><img class="sp-dev" src="img/dev-logo.png" width="40" height="56" alt="وقار"></div>
-<script>window.__t0=Date.now();window.hideSplash=function(){var s=document.getElementById("splash");if(!s||s.classList.contains("out"))return;s.classList.add("out");setTimeout(function(){s.remove()},550)};setTimeout(window.hideSplash,6000);</script>
+<script>window.__t0=Date.now();window.hideSplash=function(){var s=document.getElementById("splash");if(!s||s.classList.contains("out"))return;s.classList.add("out");setTimeout(function(){s.remove()},550)};setTimeout(window.hideSplash,6000);if("serviceWorker"in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});</script>
 <div class="app">
   <section id="home">
-    <div class="hero"><img class="hlogo" src="img/logo.webp" width="300" height="300" alt="بيتنا نظيف"><h1 class="sr">بيتنا نظيف</h1></div>
+    <div class="hero"><span class="hlw"><img class="hlogo" src="img/logo.webp" width="300" height="300" alt="بيتنا نظيف"></span><h1 class="sr">بيتنا نظيف</h1></div>
     <p class="pickt">اختر الغرفة التي تبدأ منها</p>
     <div class="rooms" id="rooms"></div>
   </section>
@@ -194,7 +223,7 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
   <section id="game" hidden>
     <div class="top"><button class="back" id="back" aria-label="رجوع"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button><div class="pb" id="lv"><i></i><span></span></div><div class="pb" id="left"><i></i><span></span></div></div>
     <div class="bar" id="bar" hidden><i></i></div>
-    <div class="say" id="say" hidden aria-live="polite"><img class="bot" src="img/boy.png" width="56" height="56" alt=""><p id="sayt"></p><span class="arw" id="arw" hidden aria-hidden="true">⬆</span></div>
+    <div class="say" id="say" hidden aria-live="polite"><img class="bot" src="img/boy.png" width="56" height="56" alt=""><div class="think" id="think" aria-hidden="true"><i class="t1"></i><i class="t2"></i><div class="cloud"><img id="thinkImg" alt="" width="64" height="64"></div></div><span class="arw" id="arw" hidden aria-hidden="true">⬆</span><p id="sayt" class="sr"></p></div>
     <button class="nv" id="nl" aria-label="دوران لليسار">◀</button><button class="nv" id="nr" aria-label="دوران لليمين">▶</button><button class="nv" id="dp" hidden>✋ اترك الغرض</button><button class="nv" id="mt" aria-label="كتم الصوت">🔊</button>
     <div id="tp">تحرّك بالعصا، واسحب الشاشة للنظر. اضغط غرضًا عليه حلقة ذهبية لتمسكه، ثم اذهب به واضغط مكانه. وعند الانتهاء اخرج من الباب.</div>
     <div id="room"></div>
@@ -218,7 +247,7 @@ catch(err){$("home").insertAdjacentHTML("beforeend","<p>تعذّر تحميل ا
 try{document.fonts&&document.fonts.load("700 28px Cairo")}catch(e){}
 
 /* ============ بيانات اللعبة ============ */
-const kCush="\u{1F6CB}",kRemote="\u{1F4FA}",kMag="\u{1F4F0}",kPillow="\u{1F6CC}",kBlank="\u{1F9E3}",kBrush="\u{1FAA5}",kSoap="\u{1F9FC}",kShamp="\u{1F9F4}",kRoll="\u{1F9FB}",kApple="\u{1F34E}",kCheese="\u{1F9C0}",kCarrot="\u{1F955}",kEgg="\u{1F95A}";
+const kCush="\u{1F6CB}",kRemote="\u{1F4FA}",kMag="\u{1F4F0}",kPillow="\u{1F6CC}",kBlank="\u{1F9E3}",kBrush="\u{1FAA5}",kSoap="\u{1F9FC}",kShamp="\u{1F9F4}",kRoll="\u{1F9FB}",kApple="\u{1F34E}",kCheese="\u{1F9C0}",kCarrot="\u{1F955}",kEgg="\u{1F95A}",kTissue="\u{1F927}",kCrump="\u{1F5D2}";
 const Z={
  closet:{n:"الخزانة",items:["👕","👖","🧦","🧢","🧥","👗"]},
  shelf:{n:"الرف",items:["📖","✏️","🎒","📒","🖍️","📐"]},
@@ -242,7 +271,7 @@ const L=[
  {id:"kitchen",name:"المطبخ",z:["fridge","kitchen","trash"],n:10,t:70,wall:0xffc977,floor:"tile",rug:0}
 ];
 const NM={"👕":"القميص","👖":"البنطال","🧦":"الجورب","🧢":"القبعة","🧥":"المعطف","👗":"الفستان","📖":"الكتاب","✏️":"القلم","🎒":"الحقيبة","📒":"الدفتر","🖍️":"ألوان الشمع","📐":"المسطرة","🧸":"الدمية","🚗":"السيارة","🧩":"قطع التركيب","⚽":"الكرة","🪁":"الطائرة الورقية","🎲":"النرد","🍌":"قشر الموز","🧃":"علبة العصير الفارغة","🥤":"الكوب الفارغ","📄":"الورقة الممزقة","🥛":"كوب الحليب","🥣":"الوعاء","🍴":"الملاعق","☕":"الفنجان"};
-Object.assign(NM,{[kCush]:"الوسادة الصغيرة",[kRemote]:"جهاز التحكم",[kMag]:"المجلة",[kPillow]:"المخدّة",[kBlank]:"البطانية",[kBrush]:"فرشاة الأسنان",[kSoap]:"الصابونة",[kShamp]:"زجاجة الشامبو",[kRoll]:"لفة المناديل",[kApple]:"التفاحة",[kCheese]:"قطعة الجبن",[kCarrot]:"الجزرة",[kEgg]:"البيض"});
+Object.assign(NM,{[kTissue]:"المنديل المستعمل",[kCrump]:"الورقة المكرمشة",[kCush]:"الوسادة الصغيرة",[kRemote]:"جهاز التحكم",[kMag]:"المجلة",[kPillow]:"المخدّة",[kBlank]:"البطانية",[kBrush]:"فرشاة الأسنان",[kSoap]:"الصابونة",[kShamp]:"زجاجة الشامبو",[kRoll]:"لفة المناديل",[kApple]:"التفاحة",[kCheese]:"قطعة الجبن",[kCarrot]:"الجزرة",[kEgg]:"البيض"});
 const WHY={closet:"الملابس تُحفظ في الخزانة لتبقى نظيفة ومرتبة.",shelf:"أدوات الدراسة مكانها الرف لتجدها وقت الواجب.",toys:"الألعاب مكانها صندوق الألعاب كي لا يتعثر بها أحد.",trash:"المهملات مكانها السلة حتى تبقى الغرفة نظيفة.",kitchen:"أدوات الأكل والشرب مكانها المطبخ."};
 Object.assign(WHY,{sofa:"الوسائد والمجلات وجهاز التحكم مكانها الأريكة.",bed:"الوسادة والبطانية والدمية مكانها السرير لتنام مرتاحًا.",cabinet:"أدوات النظافة مكانها خزانة الحمام.",laundry:"الملابس المتسخة مكانها سلة الغسيل.",fridge:"الطعام الطازج مكانه الثلاجة ليبقى صالحًا."});
 const TIPS=["الترتيب يساعدك تلاقي أغراضك بسرعة.","كل غرض له بيت، وبيته يحميه من الضياع.","الغرفة المرتبة تعطيك مساحة أكبر للّعب."];
@@ -490,6 +519,14 @@ const MK={
 [kPaper]:()=>{const g=new THREE.IcosahedronGeometry(.085,1),p=g.attributes.position;
  for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),k=1+.13*Math.sin(x*91+y*57+z*33)*Math.cos(x*47-z*63+y*11);p.setXYZ(i,x*k,y*k,z*k)}
  g.computeVertexNormals();const m=M(0xffffff,.9);m.flatShading=true;const o=sh(new THREE.Mesh(g,m));o.position.y=.08;return Gp(o)},
+[kTissue]:()=>{const g=new THREE.IcosahedronGeometry(.07,2),p=g.attributes.position;
+ for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),k=1+.2*Math.sin(x*70+y*40)*Math.cos(z*55-x*30)+.08*Math.sin(y*120+z*90);p.setXYZ(i,x*k*1.35,y*k*.6,z*k*1.15)}
+ g.computeVertexNormals();const m=M(0xf6faff,.95);m.flatShading=true;const o=sh(new THREE.Mesh(g,m));o.position.y=.045;
+ return Gp(o,el(.04,.012,.03,M(0xe9f1fb,.95),.03,.075,-.01))},
+[kCrump]:()=>{const g=new THREE.IcosahedronGeometry(.075,1),p=g.attributes.position;
+ for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),k=1+.18*Math.sin(x*83+y*29+z*61)*Math.cos(x*37-z*71+y*19);p.setXYZ(i,x*k,y*k*.9,z*k)}
+ g.computeVertexNormals();const m=M(0xf2e8c8,.9);m.flatShading=true;const o=sh(new THREE.Mesh(g,m));o.position.y=.07;
+ const ln=M(0x7fa8d8,.8);return Gp(o,R3(bx(.12,.004,.006,ln,0,.1,.05),.3,.4,0),R3(bx(.1,.004,.006,ln,.01,.12,.03),.5,-.2,0))},
 [kMilk]:()=>{const gm=M(0xdfeeff,.1);gm.transparent=true;gm.opacity=.4;const ml=M(0xffffff,.55);
  return Gp(cy(.052,.042,.13,gm,0,.065,0,28),cy(.047,.039,.1,ml,0,.055,0,28),el(.047,.012,.047,ml,0,.105,0),R3(cy(.004,.004,.12,M(0xff5d73,.6),.014,.15,0,8),0,0,.12),el(.012,.004,.007,M(0xffffff,.9),-.015,.095,.04))},
 [kBowl]:()=>{const m=M(0xffc93c,.5),rm=M(0xe0a800,.5),cr=M(0xfff1c9,.8),ce=[0xe0a24a,0xf0b960,0xd18a3a];
@@ -823,10 +860,33 @@ function taskText(){try{
  if(doorOpen)return "أحسنت! اخرج من الباب إلى "+L[nextL()].name;
  if(over)return "";
  return left>0?"التقط غرضًا عليه حلقة ذهبية ("+left+" باقية)":""}catch(e){return ""}}
+/* صورة مصغّرة حقيقية لأي غرض أو قطعة أثاث من اللعبة نفسها (تُرسم مرة وتُحفظ) */
+const SNAP={},snapRT=new THREE.WebGLRenderTarget(160,160,{samples:4});snapRT.texture.colorSpace=THREE.SRGBColorSpace;
+const snapScene=new THREE.Scene();snapScene.add(new THREE.HemisphereLight(0xffffff,0xd9cbb5,2.4));{const d=new THREE.DirectionalLight(0xffffff,1.6);d.position.set(2,4,3);snapScene.add(d)}
+const snapCam=new THREE.PerspectiveCamera(30,1,.01,50);
+function snapshot(key,src,yawV){if(SNAP[key])return SNAP[key];
+ const c=src.clone(true);c.position.set(0,0,0);c.rotation.set(0,yawV||0,0);c.scale.setScalar(1);
+ const rm=[];c.traverse(o=>{if(o.isSprite||(o.isMesh&&o.material&&o.material.opacity===0))rm.push(o)});rm.forEach(o=>o.parent&&o.parent.remove(o));
+ snapScene.add(c);c.updateMatrixWorld(true);const b=new THREE.Box3().setFromObject(c),s=b.getSize(new THREE.Vector3()),ct=b.getCenter(new THREE.Vector3());
+ const r=Math.max(s.x,s.y,s.z)*.62/Math.tan(15*Math.PI/180);snapCam.position.set(ct.x+r*.45,ct.y+r*.42,ct.z+r*.78);snapCam.lookAt(ct);snapCam.updateMatrixWorld();
+ const cc=new THREE.Color();renderer.getClearColor(cc);const ca=renderer.getClearAlpha(),sm=renderer.shadowMap.enabled;
+ renderer.shadowMap.enabled=false;renderer.setRenderTarget(snapRT);renderer.setClearColor(0x000000,0);renderer.clear();renderer.render(snapScene,snapCam);
+ const px=new Uint8Array(160*160*4);renderer.readRenderTargetPixels(snapRT,0,0,160,160,px);
+ renderer.setRenderTarget(null);renderer.setClearColor(cc,ca);renderer.shadowMap.enabled=sm;snapScene.remove(c);
+ const cv2=document.createElement("canvas");cv2.width=cv2.height=160;const g=cv2.getContext("2d"),im=g.createImageData(160,160);
+ for(let y=0;y<160;y++)im.data.set(px.subarray((159-y)*640,(160-y)*640),y*640);g.putImageData(im,0,0);
+ return SNAP[key]=cv2.toDataURL("image/png")}
+let thinkKey="";
 function refreshSay(){const b=$("say");if(!b)return;const inGame=!$("game").hidden;
  const m=sayMsg&&performance.now()<sayUntil?sayMsg:taskText();
- b.hidden=!inGame||!m;if(b.hidden)return;
- const p=$("sayt");if(p.textContent!==m){p.textContent=m;b.classList.remove("sh2");void b.offsetWidth;b.classList.add("sh2")}}
+ /* صورة المطلوب: مكان الغرض المحمول، أو الباب المفتوح، أو أقرب غرض يجب التقاطه */
+ let key="",src=null,yv=0;
+ if(carry&&ZN[carry.userData.k]){key="z:"+carry.userData.k;src=ZN[carry.userData.k].g;yv=0}
+ else if(doorOpen&&doorLeaf){key="door";src=doorLeaf;yv=Math.PI}
+ else if(!over){let best=null,bd=1e9;itemsG.children.forEach(it=>{if(it.userData.placed)return;const d=distTo(it.position.x,it.position.z);if(d<bd){bd=d;best=it}});if(best){key="i:"+best.userData.e;src=best.children[0];yv=.5}}
+ b.hidden=!inGame||!key;if(b.hidden)return;
+ const th=$("think");if(key!==thinkKey){thinkKey=key;try{$("thinkImg").src=snapshot(key,src,yv)}catch(e){}th.classList.remove("pop");void th.offsetWidth;th.classList.add("pop")}
+ const p=$("sayt");if(p.textContent!==m){p.textContent=m;if(sayMsg&&m===sayMsg){th.classList.remove("nudge");void th.offsetWidth;th.classList.add("nudge")}}}
 /* فقاعة ثناء ملوّنة بعبارة عشوائية لا تتكرر مرتين متتاليتين، ويُسمع صوتها بعد نغمة الإنجاز */
 let lastPraise=-1,praiseEl=null,praiseT=0,praiseA=0;
 function praise(){let i;do{i=Math.floor(Math.random()*PRAISE.length)}while(i===lastPraise&&PRAISE.length>1);lastPraise=i;
@@ -863,7 +923,8 @@ function start(m,l,intro){
  while(itemsG.children.length){const c=itemsG.children[0];itemsG.remove(c);disposeG(c)}
  [...hand.children].forEach(c=>{if(c.userData&&c.userData.k){hand.remove(c);disposeG(c)}});hand.position.copy(HIDLE);hand.visible=false;Object.assign(HS,IP);$("dp").hidden=true;dpShown=false;
  yaw=tgtYaw=0;pitch=-.28;P.x=intro?-1.5:0;P.z=intro?R-1.3:0;if(!intro){rstars=[];startL=l}
- const pools={};cfg.z.forEach(k=>pools[k]=shuffle(Z[k].items));
+ const POOLS={bath:{trash:[kTissue,kCrump,kPaper]}};
+ const pools={};cfg.z.forEach(k=>pools[k]=shuffle((POOLS[cfg.id]&&POOLS[cfg.id][k])||Z[k].items));
  const off=Math.random()*Math.PI*2,blocked=(x,z)=>OBS.some(b=>x>b.min.x-.3&&x<b.max.x+.3&&z>b.min.z-.3&&z<b.max.z+.3)||Math.hypot(x-P.x,z-P.z)<.8;
  for(let i=0;i<cfg.n;i++){
   let k=cfg.z[i%cfg.z.length];if(!pools[k].length)k=cfg.z.find(q=>pools[q].length);
@@ -1238,8 +1299,8 @@ $("mt").onclick=()=>{muted=!muted;try{localStorage.setItem("roomgame.mute",muted
 const RICON={kids:"🧸",living:"🛋️",bed:"🛏️",bath:"🛁",kitchen:"🍳"};let selL=0;
 try{selL=Math.min(L.length-1,Math.max(0,+localStorage.getItem("roomgame.start")||0))}catch(e){}
 const hex=c=>"#"+c.toString(16).padStart(6,"0");
-const paintRooms=()=>{$("rooms").innerHTML=L.map((r,i)=>{const st=SV.relax[i]||0;
-  return '<button class="room" data-i="'+i+'" style="--rc:'+hex(r.wall)+'"><span class="ri">'+RICON[r.id]+'</span><b>'+r.name+'</b><span class="rs" aria-label="أفضل نتيجة '+st+' من 3">'+(st?"⭐".repeat(st)+"☆".repeat(3-st):"")+'</span><span class="go" aria-hidden="true">◀</span></button>'}).join("")};
+const paintRooms=()=>{$("rooms").innerHTML=L.map((r,i)=>
+  '<button class="room" data-i="'+i+'" style="--rc:'+hex(r.wall)+'"><span class="ri">'+RICON[r.id]+'</span><b>'+r.name+'</b><span class="go" aria-hidden="true">◀</span></button>').join("")};
 window.__paintRooms=paintRooms;
 $("rooms").onclick=e=>{const b=e.target.closest(".room");if(!b)return;selL=+b.dataset.i;try{localStorage.setItem("roomgame.start",String(selL))}catch(e){}start("relax",selL)};paintRooms();
 $("b2").onclick=()=>{clearInterval(timer);show("home")};
