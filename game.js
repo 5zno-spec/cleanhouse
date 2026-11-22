@@ -822,6 +822,7 @@ function tryGrab(it){
  const u=it.userData;
  if(carry){say("أنت تحمل غرضًا. ضعه في مكانه أولًا، أو اتركه.");return}
  if(distTo(it.position.x,it.position.z)>REACH){say("اقترب من "+(NM[u.e]||"الغرض")+" لتمسكه");return}
+ if(distTo(it.position.x,it.position.z)>1.35){walkTo(it.position.x,it.position.z,()=>distTo(it.position.x,it.position.z)<=1.25,()=>tryGrab(it));return}
  fall.delete(it);snd(520,.06);
  /* اليدان تنفتحان بقدر عرض الغرض ثم تطبقان عليه من الجانبين */
  const gb=new THREE.Box3().setFromObject(it.children[0]),gs=gb.getSize(new THREE.Vector3());
@@ -837,6 +838,7 @@ function tryGrab(it){
 function tryPlace(z){
  if(busy||over||!carry)return;
  if(distTo(z.g.position.x,z.g.position.z)>ZREACH){say("اقترب من "+Z[z.k].n+" أكثر");z.hintT=.6;return}
+ if(distTo(z.g.position.x,z.g.position.z)>1.9){const f=frontOf(z);walkTo(f.x,f.z,()=>distTo(z.g.position.x,z.g.position.z)<=1.8,()=>tryPlace(z));return}
  const it=carry,slot=z.slots[z.n%z.slots.length].clone(),ap=approachOf(z,slot);
  /* اليدان تمتدّان إلى مدخل المكان (أمامه أو فوقه) لا إلى داخله، فلا تخترقان الأثاث */
  if(it.userData.k!==z.k){reach(ap,.3,()=>wrong(it,z),.2);return}
