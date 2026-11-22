@@ -216,8 +216,7 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
 <div class="app">
   <section id="home">
     <div class="hero"><span class="hlw"><img class="hlogo" src="img/logo.webp" width="300" height="300" alt="بيتنا نظيف"></span><h1 class="sr">بيتنا نظيف</h1></div>
-    <p class="pickt">اختر الغرفة التي تبدأ منها</p>
-    <div class="rooms" id="rooms"></div>
+    <div class="rooms" id="rooms"><button class="room" id="play" style="--rc:#1f965a"><span class="ri">🏠</span><b>ادخل البيت</b><span class="go" aria-hidden="true">◀</span></button></div>
   </section>
 
   <section id="game" hidden>
@@ -225,7 +224,7 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
     <div class="bar" id="bar" hidden><i></i></div>
     <div class="say" id="say" hidden aria-live="polite"><img class="bot" src="img/boy.png" width="56" height="56" alt=""><div class="think" id="think" aria-hidden="true"><i class="t1"></i><i class="t2"></i><div class="cloud"><img id="thinkImg" alt="" width="64" height="64"></div></div><span class="arw" id="arw" hidden aria-hidden="true">⬆</span><p id="sayt" class="sr"></p></div>
     <button class="nv" id="nl" aria-label="دوران لليسار">◀</button><button class="nv" id="nr" aria-label="دوران لليمين">▶</button><button class="nv" id="dp" hidden>✋ اترك الغرض</button><button class="nv" id="mt" aria-label="كتم الصوت">🔊</button>
-    <div id="tp">تحرّك بالعصا، واسحب الشاشة للنظر. اضغط غرضًا عليه حلقة ذهبية لتمسكه، ثم اذهب به واضغط مكانه. وعند الانتهاء اخرج من الباب.</div>
+    <div id="tp">تجوّل في الممر وادخل أي غرفة. اضغط غرضًا عليه حلقة ذهبية لتمسكه، ثم ضعه في مكانه. اخرج من الباب متى شئت، ومفتاح الإضاءة بجانبه.</div>
     <div id="room"></div>
     <div id="joy" aria-label="عصا الحركة"><i></i></div>
   </section>
@@ -255,6 +254,7 @@ const Z={
  trash:{n:"سلة المهملات",items:["🍌","🧃","🥤","📄"]},
  kitchen:{n:"المطبخ",items:["🥛","🥣","🍴","☕"]},
  sofa:{n:"الأريكة",items:[kCush,kRemote,kMag]},
+ table:{n:"المنضدة",items:[]},
  bed:{n:"السرير",items:[]},
  cabinet:{n:"خزانة الحمام",items:[kBrush,kSoap,kShamp,kRoll]},
  laundry:{n:"سلة الغسيل",items:[]},
@@ -265,7 +265,7 @@ Z.laundry.items=[0,1,2,5].map(i=>Z.closet.items[i]);
 /* الشقة: خمس غرف بالترتيب، وكل غرفة لها باب تخرج منه إلى التي بعدها */
 const L=[
  {id:"kids",name:"غرفتك",z:["closet","shelf","toys","desk"],n:8,t:40,wall:0xffc2b3,floor:"wood",rug:1},
- {id:"living",name:"غرفة المعيشة",z:["sofa","shelf","toys","trash"],n:8,t:50,wall:0xffe08a,floor:"wood",rug:1},
+ {id:"living",name:"غرفة المعيشة",z:["sofa","table","shelf","toys","trash"],n:10,t:50,wall:0xffe08a,floor:"wood",rug:1},
  {id:"bed",name:"غرفة النوم",z:["bed","closet","shelf","trash"],n:9,t:55,wall:0xcdb4f5,floor:"wood",rug:1},
  {id:"bath",name:"الحمام",z:["cabinet","laundry","trash"],n:9,t:55,wall:0x9fe3de,floor:"tile",rug:0},
  {id:"kitchen",name:"المطبخ",z:["fridge","kitchen","trash"],n:10,t:70,wall:0xffc977,floor:"tile",rug:0}
@@ -273,7 +273,7 @@ const L=[
 const NM={"👕":"القميص","👖":"البنطال","🧦":"الجورب","🧢":"القبعة","🧥":"المعطف","👗":"الفستان","📖":"الكتاب","✏️":"القلم","🎒":"الحقيبة","📒":"الدفتر","🖍️":"ألوان الشمع","📐":"المسطرة","🧸":"الدمية","🚗":"السيارة","🧩":"قطع التركيب","⚽":"الكرة","🪁":"الطائرة الورقية","🎲":"النرد","🍌":"قشر الموز","🧃":"علبة العصير الفارغة","🥤":"الكوب الفارغ","📄":"الورقة الممزقة","🥛":"كوب الحليب","🥣":"الوعاء","🍴":"الملاعق","☕":"الفنجان"};
 Object.assign(NM,{[kCheeseBit]:"قطعة الجبن المكشوفة",[kTissue]:"المنديل المستعمل",[kCrump]:"الورقة المكرمشة",[kCush]:"الوسادة الصغيرة",[kRemote]:"جهاز التحكم",[kMag]:"المجلة",[kPillow]:"المخدّة",[kBlank]:"البطانية",[kBrush]:"فرشاة الأسنان",[kSoap]:"الصابونة",[kShamp]:"زجاجة الشامبو",[kRoll]:"لفة المناديل",[kApple]:"علبة الزبادي",[kCheese]:"علبة الجبن",[kCarrot]:"زجاجة العصير",[kEgg]:"كرتونة البيض"});
 const WHY={closet:"الملابس تُحفظ في الخزانة لتبقى نظيفة ومرتبة.",shelf:"أدوات الدراسة مكانها الرف لتجدها وقت الواجب.",toys:"الألعاب مكانها صندوق الألعاب كي لا يتعثر بها أحد.",trash:"المهملات مكانها السلة حتى تبقى الغرفة نظيفة.",kitchen:"أدوات الأكل والشرب مكانها المطبخ."};
-Object.assign(WHY,{sofa:"الوسائد والمجلات وجهاز التحكم مكانها الأريكة.",bed:"الوسادة والبطانية والدمية مكانها السرير لتنام مرتاحًا.",cabinet:"أدوات النظافة مكانها خزانة الحمام.",laundry:"الملابس المتسخة مكانها سلة الغسيل.",fridge:"الطعام المغلّف مكانه الثلاجة ليبقى صالحًا."});
+Object.assign(WHY,{sofa:"الوسائد مكانها الأريكة.",table:"جهاز التحكم والمجلة مكانهما المنضدة أمام الأريكة.",bed:"الوسادة والبطانية والدمية مكانها السرير لتنام مرتاحًا.",cabinet:"أدوات النظافة مكانها خزانة الحمام.",laundry:"الملابس المتسخة مكانها سلة الغسيل.",fridge:"الطعام المغلّف مكانه الثلاجة ليبقى صالحًا."});
 /* شرح خاص بغرض بعينه (يتقدّم على شرح المكان) */
 const WHYI={[kCheeseBit]:"الطعام المكشوف الذي سقط على الأرض لا يُحفظ في الثلاجة، مكانه سلة المهملات."};
 const TIPS=["الترتيب يساعدك تلاقي أغراضك بسرعة.","كل غرض له بيت، وبيته يحميه من الضياع.","الغرفة المرتبة تعطيك مساحة أكبر للّعب."];
@@ -299,7 +299,7 @@ renderer.setPixelRatio(Math.min(devicePixelRatio||1,MOBILE?1.5:2));
 const cv=renderer.domElement;cv.style.cssText="position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none";
 cv.addEventListener("contextmenu",e=>e.preventDefault());
 /* على الكمبيوتر (فأرة): تلميح يشرح التحكم بالفأرة بدل العصا والسحب */
-if(matchMedia("(hover:hover) and (pointer:fine)").matches)$("tp").textContent="حرّك الفأرة للنظر، وبكرة الفأرة للتقدم والتأخر. انقر غرضًا عليه حلقة ذهبية لتمسكه، ثم اذهب به وانقر مكانه. وعند الانتهاء اخرج من الباب.";
+if(matchMedia("(hover:hover) and (pointer:fine)").matches)$("tp").textContent="حرّك الفأرة للنظر، والبكرة للتقدم والتأخر. تجوّل في الممر وادخل أي غرفة، وانقر غرضًا عليه حلقة ذهبية لتمسكه ثم انقر مكانه. اخرج من الباب متى شئت، ومفتاح الإضاءة بجانبه (أو زر L).";
 room.appendChild(cv);
 const scene=new THREE.Scene();
 const cam=new THREE.PerspectiveCamera(70,1,.05,40);cam.rotation.order="YXZ";cam.position.set(0,1.45,0);
@@ -397,13 +397,15 @@ function mkDesk(){
  /* كرسي أمام المكتب */
  const c=new THREE.Group();c.position.set(-.15,0,D/2+.32);c.add(bx(.42,.05,.4,seat,0,.45,0),bx(.42,.4,.05,seat,0,.68,.18));[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>c.add(bx(.04,.43,.04,dk,a*.18,.215,b*.17)));g.add(c);
  return{g,hit:[W+.1,H+.6,D+.4],hz:.1,slots:[[-.4,H,.02],[-.08,H,.05],[.22,H,.02],[.52,H,.05]],lab:1.45,fit:[.3,.32,.4],ap:[0,.35,.3]}}
+function mkCoffee(){const g=dTable(1.0,.6,.4,M(0x6b4a2c,.6));
+ return{g,hit:[1.1,.6,.75],slots:[[-.25,.4,0],[.22,.4,.02],[0,.4,-.12]],lab:.95,fit:[.3,.25,.3],ap:[0,.3,.3]}}
 function mkShelf(){
  const g=new THREE.Group(),W=1.9,H=2.1,D=.4,t=.05,wd=M(0xa8703c,.6),inn=M(0x6b4425,.9);
  g.add(bx(t,H,D,wd,-W/2+t/2,H/2,0),bx(t,H,D,wd,W/2-t/2,H/2,0),bx(W,t,D,wd,0,H-t/2,0),bx(W,.08,D,wd,0,.04,0),bx(W-2*t,H,.02,inn,0,H/2,-D/2+.01));
  [.55,1.05,1.55].forEach(y=>g.add(bx(W-2*t,.04,D-.02,wd,0,y,0)));
  const row=(y,x0,n,hm)=>{let x=x0;for(let i=0;i<n;i++){const w=.04+Math.random()*.03,h=.22+Math.random()*(hm-.22);g.add(bx(w,h,.2+Math.random()*.08,M(C6[(i+Math.floor(y*7))%6],.7),x+w/2,y+.02+h/2,-.02));x+=w+.005}};
  row(1.05,-.85,11,.42);row(1.55,-.85,12,.42);row(.55,-.85,6,.4);
- return{g,hit:[W+.1,H+.1,D+.5],hz:.15,slots:[[-.25,.08,0],[.2,.08,0],[.6,.08,0]],lab:H+.2,fit:[.4,.42,.32],ap:[0,.04,.45]}}
+ return{g,hit:[W+.1,H+.1,D+.5],hz:.15,slots:[[.12,1.07,0],[.52,1.07,0],[.12,1.57,0],[.52,1.57,0]],lab:H+.2,fit:[.4,.4,.32],ap:[0,.04,.45]}}
 function mkToys(){
  const g=new THREE.Group(),W=1.3,H=.7,D=.7,t=.05,bl=M(0x1d7fd1,.55),yl=M(0xe0a800,.55),inn=M(0x14283f,.95);
  g.add(bx(W,H,t,bl,0,H/2,D/2-t/2),bx(W,H,t,bl,0,H/2,-D/2+t/2),bx(t,H,D-2*t,bl,-W/2+t/2,H/2,0),bx(t,H,D-2*t,bl,W/2-t/2,H/2,0),bx(W-2*t,t,D-2*t,inn,0,.1,0));
@@ -459,7 +461,8 @@ function outline(root,th=.007){
  return root}
 const [kShirt,kPants,kSock,kCap,kJacket,kDress]=Z.closet.items,[kBook,kPencil,kBag,kNote,kCrayon,kRuler]=Z.shelf.items,[kBear,kCar,kPuzzle,kBall,kKite,kDice]=Z.toys.items,[kBanana,kJuice,kCup,kPaper]=Z.trash.items,[kMilk,kBowl,kCutlery,kMug]=Z.kitchen.items;
 /* الكتب مكانها المكتبة، والأدوات الدراسية (القلم والألوان والمسطرة والدفتر والحقيبة) مكانها المكتب */
-const kBookB="\u{1F4D8}",kBookG="\u{1F4D7}";
+const kBookB="\u{1F4D8}",kBookG="\u{1F4D7}",kCush2="\u{1F7E6}";
+Z.sofa.items=[kCush,kCush2];Z.table.items=[kRemote,kMag];NM[kCush2]="الوسادة الزرقاء";
 Z.desk={n:"المكتب",items:[kPencil,kCrayon,kRuler,kNote,kBag]};Z.shelf={n:"المكتبة",items:[kBook,kBookB,kBookG]};
 Object.assign(NM,{[kBook]:"الكتاب الأحمر",[kBookB]:"الكتاب الأزرق",[kBookG]:"الكتاب الأخضر"});
 Object.assign(WHY,{shelf:"الكتب مكانها المكتبة، مصفوفة على الرف.",desk:"الأدوات الدراسية مكانها المكتب لتجدها وقت الواجب."});
@@ -468,6 +471,7 @@ const bookM=(c1,c2)=>()=>{const cv=M(c1,.7),pg=M(0xfff3da,.9),gd=M(c2,.6);
  return Gp(flatRect(.2,.27,.012,.012,cv,0,.006,0),flatRect(.186,.256,.028,.006,pg,.004,.026,0),flatRect(.2,.27,.012,.012,cv,0,.044,0),R3(cy(.026,.026,.268,cv,-.098,.025,0,18),Math.PI/2,0,0),el(.034,.004,.034,gd,.005,.0505,.03),el(.016,.0045,.016,cv,.005,.051,.03),flatRect(.12,.04,.006,.002,pg,.005,.0505,-.07),flatRect(.02,.07,.004,.0015,gd,.06,.04,.15))};
 const MK={
 [kBookB]:bookM(0x35a7ff,0xffffff),
+[kCush2]:()=>{const m=M(0x35a7ff,.85),a=M(0xffffff,.8);return Gp(flatRect(.22,.22,.075,.03,m,0,.0375,0),flatRect(.22,.03,.08,.01,a,0,.0385,0),sp(.012,GOLD(),0,.078,0))},
 [kBookG]:bookM(0x1fb5a5,0xffc93c),
 [kShirt]:()=>{const m=M(0x35a7ff,.8),tr=M(0xffffff,.8),ye=M(0xffc93c,.7);
  const s=smoothShape([[-.045,.125],[0,.1],[.045,.125],[.1,.12],[.165,.06],[.145,-.005],[.098,.012],[.095,-.125],[-.095,-.125],[-.098,.012],[-.145,-.005],[-.165,.06],[-.1,.12]]);
@@ -628,7 +632,7 @@ function layoutRoom(cfg){
  const TZ=1.8;
  if(id==="kids"){Zn("closet",mkCloset,0,FZ(.7),0);Zn("shelf",mkShelf,-R+.22,0,Math.PI/2);Zn("toys",mkToys,R-.4,TZ,-Math.PI/2);Zn("desk",mkDesk,.95,R-.36,Math.PI)}
  else if(id==="living"){Zn("sofa",mkSofa,0,FZ(.95),0);Zn("shelf",mkShelf,-R+.22,0,Math.PI/2);Zn("toys",mkToys,R-.4,TZ,-Math.PI/2);Zn("trash",mkTrash,2.55,-R+.45,0);
-  mkDecor(dTV,1.2,R-.245,Math.PI);mkDecor(()=>dTable(1.0,.6,.4,M(0x6b4a2c,.6)),0,-1.6,0)}
+  mkDecor(dTV,1.2,R-.245,Math.PI);Zn("table",mkCoffee,0,-1.6,0)}
  else if(id==="bed"){Zn("bed",mkBed,1.5,-R+1.02,0);Zn("closet",mkCloset,-1.2,FZ(.7),0);Zn("shelf",mkShelf,-R+.22,0,Math.PI/2);Zn("trash",mkTrash,1.2,R-.4,Math.PI);mkDecor(dNight,.3,-R+.22,0)}
  else if(id==="bath"){Zn("cabinet",mkCabinet,.55,FZ(.5),0);Zn("laundry",mkLaundry,2.45,-2.55,0);Zn("trash",mkTrash,1.2,R-.4,Math.PI);
   mkDecor(dTub,-1.9,-R+.45,0);mkDecor(dToilet,-R+.3,1.1,Math.PI/2)}
@@ -640,7 +644,14 @@ function buildDoor(){
  const fm=M(0x4a2f1b,.7),dm=M(0x8a5a33,.6),pn=M(0xa06a3c,.6),X=-1.6;
  doorMat=dm;doorOpen=false;doorO=0;doorLab=null;
  const fr=Gp(bx(.09,2.2,.08,fm,X-.515,1.1,R-.04),bx(.09,2.2,.08,fm,X+.515,1.1,R-.04),bx(1.12,.09,.08,fm,X,2.155,R-.04));outline(fr,.01);roomG.add(fr);
- doorGlow=new THREE.Mesh(new THREE.PlaneGeometry(.95,2.1),new THREE.MeshBasicMaterial({color:0xffd79a,fog:false}));doorGlow.position.set(X,1.05,R-.02);doorGlow.rotation.y=Math.PI;roomG.add(doorGlow);
+ doorGlow=null;
+ /* خارج الباب: قطعة من ممر الشقة تظهر حين ينفتح الباب (لا خلفية سوداء) */
+ {const og=new THREE.Group(),D2=2.2,W2=5,cx=X+.6,hw=TN({color:new THREE.Color(0xf6e3c4),map:TX.stripes()});
+  const pq=(w,hh,m,x,y,z,rx,ry)=>{const o=new THREE.Mesh(new THREE.PlaneGeometry(w,hh),m);o.position.set(x,y,z);o.rotation.set(rx||0,ry||0,0);og.add(o)};
+  pq(W2,D2,TN({map:TX.herring()}),cx,0,R+D2/2,-Math.PI/2,0);pq(W2,WH,hw,cx,WH/2,R+D2,0,Math.PI);pq(W2,D2,TN({color:new THREE.Color(0xfaf1e2)}),cx,WH,R+D2/2,Math.PI/2,0);
+  pq(D2,WH,hw,cx-W2/2,WH/2,R+D2/2,0,Math.PI/2);pq(D2,WH,hw,cx+W2/2,WH/2,R+D2/2,0,-Math.PI/2);pq(W2,.95,TN({color:new THREE.Color(0x8a5a33)}),cx,.475,R+D2-.006,0,Math.PI);
+  pq(W2-.6,.8,TN({color:new THREE.Color(0xb23a32)}),cx,.006,R+1.1,-Math.PI/2,0);
+  const lp=new THREE.Mesh(new THREE.CylinderGeometry(.18,.18,.04,20),glowM());lp.position.set(X,WH-.02,R+1.1);og.add(lp);roomG.add(og)}
  doorLeaf=new THREE.Group();doorLeaf.position.set(X-.475,0,R-.06);
  doorLeaf.add(bx(.95,2.12,.06,dm,.475,1.06,0),bx(.7,.8,.02,pn,.475,1.55,-.035),bx(.7,.8,.02,pn,.475,.6,-.035),sp(.045,GOLD(),.83,1.0,-.06));outline(doorLeaf,.01);roomG.add(doorLeaf);
  const dh=new THREE.Mesh(new THREE.BoxGeometry(1.2,2.3,.6),hidMat());dh.position.set(X,1.15,R-.3);dh.userData.door=true;roomG.add(dh);doorHits=[dh]}
@@ -841,7 +852,7 @@ function buildRoom(cfg){const zs=cfg.z;
  const plane=(w,h,m,x,y,z,rx,ry)=>{const o=new THREE.Mesh(new THREE.PlaneGeometry(w,h),m);o.position.set(x,y,z);o.rotation.set(rx||0,ry||0,0);o.receiveShadow=true;roomG.add(o);return o};
  plane(2*R,2*R,TN({map:TH.floor()}),0,0,0,-Math.PI/2,0);
  const ce=new THREE.Color(wallC).multiplyScalar(.7);plane(2*R,2*R,TN({color:ce}),0,WH,0,Math.PI/2,0);
- plane(2*R,WH,wm(),0,WH/2,-R,0,0);plane(2*R,WH,wm(),0,WH/2,R,0,Math.PI);plane(2*R,WH,wm(),-R,WH/2,0,0,Math.PI/2);
+ plane(2*R,WH,wm(),0,WH/2,-R,0,0);plane(R-2.1,WH,wm(),(-R-2.1)/2,WH/2,R,0,Math.PI);plane(R+1.1,WH,wm(),(R-1.1)/2,WH/2,R,0,Math.PI);plane(1.0,WH-2.2,wm(),-1.6,2.2+(WH-2.2)/2,R,0,Math.PI);plane(2*R,WH,wm(),-R,WH/2,0,0,Math.PI/2);
  /* الجدار الشرقي بفتحة نافذة حقيقية */
  const slab=(w,h,y,z)=>{const o=bx(.1,h,w,wm(),R+.05,y,z);roomG.add(o)};
  slab(R-.95,WH,WH/2,-(R+.95)/2);slab(R-.95,WH,WH/2,(R+.95)/2);slab(1.9,1.0,.5,0);slab(1.9,.7,2.65,0);
@@ -851,11 +862,12 @@ function buildRoom(cfg){const zs=cfg.z;
  roomG.add(bx(.16,.05,2.1,fm,R-.08,.96,0));
  /* بلنث وسجادة ومصباح وباب */
  const bm=TN({color:baseC});
- roomG.add(bx(2*R,.12,.03,bm,0,.06,-R+.015),bx(2*R,.12,.03,bm,0,.06,R-.015),bx(.03,.12,2*R,bm,-R+.015,.06,0),bx(.03,.12,2*R,bm,R-.015,.06,0));
+ roomG.add(bx(2*R,.12,.03,bm,0,.06,-R+.015),bx(R-2.1,.12,.03,bm,(-R-2.1)/2,.06,R-.015),bx(R+1.1,.12,.03,bm,(R-1.1)/2,.06,R-.015),bx(.03,.12,2*R,bm,-R+.015,.06,0),bx(.03,.12,2*R,bm,R-.015,.06,0));
  if(TH.rug){const rug=TH.rug();rug.receiveShadow=true;roomG.add(rug)}
  /* مصباح السقف الخاص بكل غرفة */
  (LAMPS[cfg.id]||LAMPS.living)();
  buildDoor();
+ roomSw=lightSwitch(roomG,-.82,1.2,R-.02,Math.PI);
  /* الأثاث */
  layoutRoom(cfg);
  /* زينة الغرفة: لوحات وستائر ونباتات ومصابيح أرضية... */
@@ -881,13 +893,15 @@ const saveBest=(m,l,st)=>{const was=SV[m][l]||0;if(st<=was)return false;SV[m][l]
 function paintBest(){window.__paintRooms&&window.__paintRooms()}
 /* ترتيب الغرف يبدأ من الغرفة المختارة ويدور: التالية بعد الأخيرة هي الأولى، وينتهي اللعب حين نعود إلى غرفة البداية */
 const nextL=()=>(lvl+1)%L.length,ordOf=i=>(i-startL+L.length)%L.length;
-function hud(){const s=(id,t,p)=>{const e=$(id);e.querySelector("span").textContent=t;e.querySelector("i").style.width=clamp(p,0,100)+"%"};const od=ordOf(hl);s("lv",L[hl].name+" "+(od+1)+"/"+L.length,(od+(total-left)/total)/L.length*100);s("left","المتبقي: "+left,left/total*100)}
+function hud(){const s=(id,t,p)=>{const e=$(id);e.querySelector("span").textContent=t;e.querySelector("i").style.width=clamp(p,0,100)+"%"};
+ if(inHall){const d=doneCount();s("lv","🚪 الممر",d/L.length*100);s("left","نظيف: "+d+" من "+L.length,d/L.length*100);return}
+ s("lv",RICON[L[hl].id]+" "+L[hl].name,(total-left)/total*100);s("left","المتبقي: "+left,left/total*100)}
 /* فقاعة الولد تحت العدادات: تعرض رسالة مؤقتة (3.8 ث) ثم تعود إلى «المطلوب الآن» */
 let sayMsg="",sayUntil=0,sayChk=0;
 const say=t=>{sayMsg=t||"";sayUntil=t?performance.now()+3800:0;refreshSay()};
 function taskText(){try{
  if(carry){const u=carry.userData;return "ضع "+(NM[u.e]||"الغرض")+" في "+Z[u.k].n}
- if(doorOpen)return "أحسنت! اخرج من الباب إلى "+L[nextL()].name;
+ if(rdone)return "أحسنت! اخرج إلى الممر واختر غرفة أخرى";
  if(over)return "";
  return left>0?"التقط غرضًا عليه حلقة ذهبية ("+left+" باقية)":""}catch(e){return ""}}
 /* صورة مصغّرة حقيقية لأي غرض أو قطعة أثاث من اللعبة نفسها (تُرسم مرة وتُحفظ) */
@@ -907,12 +921,12 @@ function snapshot(key,src,yawV){if(SNAP[key])return SNAP[key];
  for(let y=0;y<160;y++)im.data.set(px.subarray((159-y)*640,(160-y)*640),y*640);g.putImageData(im,0,0);
  return SNAP[key]=cv2.toDataURL("image/png")}
 let thinkKey="",thinkTarget=null;
-function refreshSay(){const b=$("say");if(!b)return;const inGame=!$("game").hidden;
+function refreshSay(){const b=$("say");if(!b)return;const inGame=!$("game").hidden;if(inHall){b.hidden=true;return}
  const m=sayMsg&&performance.now()<sayUntil?sayMsg:taskText();
  /* صورة المطلوب: مكان الغرض المحمول، أو الباب المفتوح، أو أقرب غرض يجب التقاطه */
  let key="",src=null,yv=0;thinkTarget=null;
  if(carry&&ZN[carry.userData.k]){key="z:"+carry.userData.k;src=ZN[carry.userData.k].g;yv=0}
- else if(doorOpen&&doorLeaf){key="door";src=doorLeaf;yv=Math.PI}
+ else if(rdone&&doorLeaf){key="door";src=doorLeaf;yv=Math.PI}
  else if(!over){let best=null,bd=1e9;itemsG.children.forEach(it=>{if(it.userData.placed)return;const d=distTo(it.position.x,it.position.z);if(d<bd){bd=d;best=it}});if(best){key="i:"+best.userData.e;src=best.children[0];yv=.5}thinkTarget=best}
  b.hidden=!inGame||!key;if(b.hidden)return;
  const th=$("think");if(key!==thinkKey){thinkKey=key;try{$("thinkImg").src=snapshot(key,src,yv)}catch(e){}th.classList.remove("pop");void th.offsetWidth;th.classList.add("pop")}
@@ -930,7 +944,7 @@ function snd(f,d){if(muted)return;try{ac=ac||new(window.AudioContext||window.web
 function sfx(k){if(muted)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const t=ac.currentTime;
 const n=(ty,f,d,v)=>{const b=ac.createBuffer(1,ac.sampleRate*d,ac.sampleRate),a=b.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=(Math.random()*2-1)*(k==="trash"?(Math.sin(i/90)>0?1:.3):1);const s=ac.createBufferSource(),fl=ac.createBiquadFilter(),g=ac.createGain();s.buffer=b;fl.type=ty;fl.frequency.value=f;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);s.connect(fl);fl.connect(g);g.connect(ac.destination);s.start(t)};
 const o=(f1,f2,d,v)=>{const s=ac.createOscillator(),g=ac.createGain();s.frequency.setValueAtTime(f1,t);s.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);s.connect(g);g.connect(ac.destination);s.start(t);s.stop(t+d)};
-({closet:()=>n("bandpass",1800,.25,.25),shelf:()=>{o(220,110,.12,.25);n("lowpass",900,.08,.2)},toys:()=>{o(140,50,.2,.4);n("lowpass",500,.1,.2)},kitchen:()=>{o(2200,2100,.35,.12);o(3100,3000,.25,.08)},trash:()=>n("highpass",2500,.25,.2)})[{sofa:"closet",bed:"closet",laundry:"closet",cabinet:"kitchen",fridge:"kitchen"}[k]||k]()}catch(e){}}
+({closet:()=>n("bandpass",1800,.25,.25),shelf:()=>{o(220,110,.12,.25);n("lowpass",900,.08,.2)},toys:()=>{o(140,50,.2,.4);n("lowpass",500,.1,.2)},kitchen:()=>{o(2200,2100,.35,.12);o(3100,3000,.25,.08)},trash:()=>n("highpass",2500,.25,.2)})[{sofa:"closet",table:"shelf",bed:"closet",laundry:"closet",cabinet:"kitchen",fridge:"kitchen"}[k]||k]()}catch(e){}}
 
 function show(id){if(id!=="game")hallRun=null;["home","game"].forEach(s=>$(s).hidden=s!==id);$("res").hidden=true;if(id!=="game")say("");if(id==="home")paintBest()}
 function timerTick(){if(doorOpen){clearInterval(timer);return}const t=L[lvl].t,rem=(end-Date.now())/1000;
@@ -942,19 +956,28 @@ document.addEventListener("visibilitychange",()=>{
  if(document.hidden){clearInterval(timer);pausedRem=end-Date.now()}
  else if(pausedRem!==null){end=Date.now()+pausedRem;pausedRem=null;timer=setInterval(timerTick,100);say("تابع من حيث توقفت!")}});
 
-function start(m,l,intro){
+function start(m,l,intro,silent){
  /* خطوة «اللعب» في سجل المتصفح: زر الرجوع في الهاتف يعود إلى الغرف بدل الخروج من التطبيق */
- try{if(!history.state||history.state.s!=="game")history.pushState({s:"game"},"")}catch(e){}
+ if(!silent){try{if(!history.state||history.state.s!=="room")history.pushState({s:"room"},"")}catch(e){}}
  hallRun=null;
  mode=m;lvl=l;mistakes=0;over=false;clearInterval(timer);pausedRem=null;streak=0;fall.clear();tw.length=0;carry=null;busy=false;reaching=false;
- const cfg=L[l];total=left=cfg.n;show("game");fit();hl=l;if(!intro)startL=l;hud();
- {const av=document.querySelector("#say .bot");if(av)av.src=ordOf(l)%2?"img/girl.png":"img/boy.png"}
+ const cfg=L[l];total=left=cfg.n;if(!silent){show("game");fit()}hl=l;if(!intro)startL=l;hud();
+ {const av=document.querySelector("#say .bot");if(av)av.src=l%2?"img/girl.png":"img/boy.png"}
  $("bar").hidden=m!=="time";
  say(m==="time"?"هيا بسرعة! الصواب يزيد الوقت، والخطأ يخصم 3 ثوانٍ.":"اسحب كل غرض إلى مكانه الصحيح. خذ وقتك!");
- buildRoom(cfg);say("📍 "+cfg.name+(!intro?" — الباب خلفك. بعد الترتيب يُفتح، فتنتقل إلى الغرفة التالية":" — رتّب كل غرض في مكانه"));
+ buildRoom(cfg);doorOpen=true;rdone=false;roomLight=true;if(!silent)say("📍 "+cfg.name);
+ doorLab=label("🚪",2.6);doorLab.position.set(-1.6,2.6,R-.5);doorLab.scale.set(.4,.26,1);roomG.add(doorLab);
  while(itemsG.children.length){const c=itemsG.children[0];itemsG.remove(c);disposeG(c)}
  [...hand.children].forEach(c=>{if(c.userData&&c.userData.k){hand.remove(c);disposeG(c)}});hand.position.copy(HIDLE);hand.visible=false;Object.assign(HS,IP);$("dp").hidden=true;dpShown=false;
  yaw=tgtYaw=0;pitch=tgtPitch=-.28;vMx=vMy=0;P.x=intro?-1.5:0;P.z=intro?R-1.3:0;if(!intro){rstars=[];startL=l}
+ const SV0=ROOMS[l];
+ if(SV0){/* العودة إلى غرفة زارها: كل غرض في المكان الذي تُرك فيه، وما رُتّب يبقى في مكانه */
+  mistakes=SV0.mistakes||0;rdone=!!SV0.done;roomLight=SV0.light!==false;let rem=0;
+  SV0.items.forEach(sv=>{const it=mkItem(sv.e,sv.k);itemsG.add(it);
+   if(sv.placed){const z=ZN[sv.k],slot=z.slots[(z.n++)%z.slots.length].clone(),pp=placePose(it,z,slot);it.position.copy(pp.p);it.quaternion.copy(pp.q);it.scale.setScalar(pp.k);it.userData.placed=true;z.items.push(it)}
+   else{it.position.set(sv.x,0,sv.z);it.rotation.y=sv.ry;rem++}});
+  left=rem}
+ else{
  const POOLS={bath:{trash:[kTissue,kCrump,kPaper]},kitchen:{trash:[kCheeseBit,kBanana,kPaper]}};
  const pools={};cfg.z.forEach(k=>pools[k]=shuffle((POOLS[cfg.id]&&POOLS[cfg.id][k])||Z[k].items));
  const off=Math.random()*Math.PI*2,blocked=(x,z)=>OBS.some(b=>x>b.min.x-.3&&x<b.max.x+.3&&z>b.min.z-.3&&z<b.max.z+.3)||Math.hypot(x-P.x,z-P.z)<.8;
@@ -965,6 +988,8 @@ function start(m,l,intro){
   {const q={x,z};pushOut(q,.3);x=q.x;z=q.z}
   const it=mkItem(pools[k].pop(),k);it.position.set(x,0,z);it.rotation.y=Math.random()*Math.PI*2;
   itemsG.add(it)}
+ }
+ applyRoomLight();if(!silent)hud();
  if(m==="time"){end=Date.now()+cfg.t*1000+(intro?1300:0);timer=setInterval(timerTick,100)}
 }
 
@@ -1090,9 +1115,9 @@ function buildHall(){
   G.add(bx(.6,.02,1.0,M(r.wall,.8),s*(HW/2+.3),.01,z));
   const leaf=new THREE.Group();leaf.position.set(x,0,z-.46);
   leaf.add(bx(.05,2.08,.92,M(0xa06a3c,.6),0,1.04,.46),bx(.02,.7,.6,M(r.wall,.6),-s*.03,1.5,.46),sp(.04,GOLD(),-s*.04,1.0,.82));G.add(leaf);
-  const lb=label(RICON[r.id]+" "+r.name,2.5);lb.position.set(s*(HW/2-.12),2.5,z);lb.scale.set(1.0,.26,1);G.add(lb);
+  const lb=label(RICON[r.id],2.5);lb.position.set(s*(HW/2-.12),2.5,z);lb.scale.set(.42,.26,1);G.add(lb);
   const glow=new THREE.Mesh(new THREE.PlaneGeometry(1.0,2.2),new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:.35,depthWrite:false}));glow.position.set(s*(HW/2-.03),1.1,z);glow.rotation.y=-s*Math.PI/2;G.add(glow);
-  return{leaf,glow,behind}});
+  return{leaf,glow,behind,lb}});
  G.updateMatrixWorld(true);return{sc,doors}}
 /* مشي الممر: يتجه اللاعب إلى باب غرفته، ثم يظهر في الممر أمامه ويمشي إلى باب الغرفة التالية، فيلتفت إليه وينفتح ويدخل */
 function hallWalk(a,b,done){
@@ -1118,6 +1143,83 @@ function hallWalk(a,b,done){
  let si=0,st=0;
  hallRun={sc:scene,step(dt){if(si>=steps.length)return;const s=steps[si];st+=dt;const u=Math.min(1,st/s.d);s.fn(u);cam.updateMatrixWorld();if(u>=1){si++;st=0;s.end&&s.end()}}}}
 
+/* ============ الشقة الحرة: الممر مكان يمشي فيه اللاعب ويدخل أي غرفة، ويخرج منها متى شاء، وتبقى كل غرفة كما تركها ============ */
+const ROOMS={};let inHall=false,rdone=false,roomLight=true,hallLight=true,roomSw=null;
+const doneCount=()=>L.reduce((s,r,i)=>s+(((ROOMS[i]&&ROOMS[i].done)||(i===lvl&&!inHall&&rdone))?1:0),0);
+/* حفظ حالة الغرفة الحالية: أين كل غرض، وما وُضع منها في مكانه، وهل نظفت، وهل اللمبة مضاءة */
+function saveRoom(){if(lvl==null)return;ROOMS[lvl]={items:itemsG.children.map(it=>({e:it.userData.e,k:it.userData.k,placed:!!it.userData.placed,x:it.position.x,z:it.position.z,ry:it.rotation.y})),done:rdone,mistakes,light:roomLight}}
+/* مفتاح إضاءة على الجدار: لوحة بيضاء وزر يتحرك */
+function lightSwitch(parent,x,y,z,ry){const g=new THREE.Group();g.position.set(x,y,z);g.rotation.y=ry;
+ const tog=bx(.035,.06,.03,M(0xdddddd,.3),0,0,.014);g.add(bx(.1,.15,.015,M(0xffffff,.4),0,0,0),tog);
+ const hit=new THREE.Mesh(new THREE.BoxGeometry(.32,.38,.2),hidMat());hit.userData.sw=true;g.add(hit);parent.add(g);return{g,hit,tog}}
+/* اللمبات: المواد المضيئة تنطفئ وتعود */
+function lampMats(root,on){root.traverse(o=>{const m=o.material;if(m&&m.isMeshStandardMaterial&&m.emissive){if(m.userData.ei===undefined)m.userData.ei=m.emissiveIntensity;m.emissiveIntensity=on?m.userData.ei:0}})}
+/* إضاءة الغرفة: عند الإطفاء يبقى ضوء النافذة، وتخفت الإضاءة العامة، وتنطفئ اللمبة */
+function applyRoomLight(){const on=roomLight;hemi.intensity=on?1.8:.5;lamp.intensity=on?1.5:0;sun.intensity=on?1.4:1.05;if(roomG)lampMats(roomG,on);if(roomSw)roomSw.tog.rotation.x=on?-.4:.4;needR=true}
+function toggleRoomLight(){roomLight=!roomLight;applyRoomLight();snd(roomLight?900:620,.05)}
+/* صورة حقيقية لداخل كل غرفة (من عند بابها) تظهر في الممر من خلال فتحة الباب قبل الدخول */
+const PREV={};
+function capturePreview(i){const rt=PREV[i]||(PREV[i]=new THREE.WebGLRenderTarget(440,520,{samples:2}));rt.texture.colorSpace=THREE.SRGBColorSpace;
+ const pc=new THREE.PerspectiveCamera(72,440/520,.05,40);pc.position.set(-1.6,1.45,R-.2);pc.rotation.set(-.1,0,0);pc.updateMatrixWorld();
+ const hv=hand.visible;hand.visible=false;renderer.shadowMap.needsUpdate=true;renderer.setRenderTarget(rt);renderer.render(scene,pc);renderer.setRenderTarget(null);hand.visible=hv;needR=true;
+ if(HALL&&HALL.doors[i].behind.material.map!==rt.texture){HALL.doors[i].behind.material.map=rt.texture;HALL.doors[i].behind.material.color.set(0xffffff);HALL.doors[i].behind.material.needsUpdate=true}}
+/* تجهيز الغرف التي لم تُزر: تُبنى بصمت مرة واحدة فتُحفظ أماكن أغرضها وتُلتقط صورتها */
+function prepRooms(){for(let i=0;i<L.length;i++){if(ROOMS[i])continue;start("relax",i,true,true);saveRoom();capturePreview(i)}}
+function augmentHall(){HALL.hits=[];
+ /* خلف كل باب: لوح كبير عليه صورة داخل الغرفة (الجدران حول الفتحة تقصّه بحجم الباب) */
+ HALL.doors.forEach((d,i)=>{const s=hallSide(i);d.behind.geometry.dispose();d.behind.geometry=new THREE.PlaneGeometry(2.2,2.6);d.behind.position.set(s*(HW/2+.9),1.3,hallZ(i));
+  d.behind.material=new THREE.MeshBasicMaterial({map:PREV[i]?PREV[i].texture:null,color:PREV[i]?0xffffff:L[i].wall,fog:false});d.glow.visible=false;d.op=0});
+ L.forEach((r,i)=>{const s=hallSide(i),hb=new THREE.Mesh(new THREE.BoxGeometry(.4,2.2,1.0),hidMat());hb.position.set(s*HW/2,1.1,hallZ(i));hb.userData.door=i;HALL.sc.add(hb);HALL.hits.push(hb)});
+ HALL.sw=lightSwitch(HALL.sc,HW/2-.01,1.2,1.4-.75,-Math.PI/2);HALL.hits.push(HALL.sw.hit);
+ HALL.lights=HALL.sc.children.filter(o=>o.isLight);HALL.sc.updateMatrixWorld(true)}
+function applyHallLight(){const on=hallLight;HALL.lights.forEach(l=>{if(l.userData.i0===undefined)l.userData.i0=l.intensity;l.intensity=on?l.userData.i0:(l.isHemisphereLight?l.userData.i0*.3:0)});
+ lampMats(HALL.sc,on);HALL.sw.tog.rotation.x=on?-.4:.4;needR=true}
+/* لافتات الأبواب: علامة ✓ على الغرف التي نظفت، ووهج خفيف على الباقية */
+function hallLabels(){HALL.doors.forEach((d,i)=>{if(d.lb){d.lb.parent&&d.lb.parent.remove(d.lb);d.lb.material.map.dispose();d.lb.material.dispose()}
+ /* أيقونة الغرفة فقط بلا كتابة، و✓ إن نظفت */
+ const done=ROOMS[i]&&ROOMS[i].done,s=hallSide(i),z=hallZ(i),lb=label(RICON[L[i].id]+(done?" ✓":""),2.5);lb.position.set(s*(HW/2-.12),2.5,z);lb.scale.set(done?.62:.42,.26,1);HALL.sc.add(lb);d.lb=lb;d.glow.visible=false;d.leaf.rotation.y=0;d.op=0})}
+function enterHall(from){
+ HALL=HALL||buildHall();if(!HALL.hits)augmentHall();
+ inHall=true;over=false;busy=false;carry=null;reaching=false;tw.length=0;hallLabels();applyHallLight();
+ hand.visible=false;$("dp").hidden=true;dpShown=false;$("bar").hidden=true;
+ if(from==null){P.x=0;P.z=1.4-.9;yaw=tgtYaw=0}else{const s=hallSide(from);P.x=s*(HW/2-.55);P.z=hallZ(from);yaw=tgtYaw=s<0?-Math.PI/2:Math.PI/2}
+ pitch=tgtPitch=-.08;vMx=vMy=0;needR=true;hud();say("")}
+function startGame(){mode="relax";prepRooms();show("game");fit();try{if(!history.state||history.state.s!=="game")history.pushState({s:"game"},"")}catch(e){}enterHall(null)}
+/* دخول غرفة من الممر: يلتفت إلى بابها فينفتح، ويخطو إليه، ثم تظهر الغرفة */
+function enterRoom(i){if(busy)return;busy=true;const d=HALL.doors[i],s=hallSide(i),z=hallZ(i),p0={x:P.x,z:P.z},y0=yaw,ty=nearest(y0,s<0?Math.PI/2:-Math.PI/2);
+ tween(.45,u=>{const e=u*u*(3-2*u);d.leaf.rotation.y=s*1.4*e;tgtYaw=yaw=y0+(ty-y0)*e},()=>
+  tween(.35,u=>{const e=u*u;P.x=p0.x+(s*(HW/2+.2)-p0.x)*e;P.z=p0.z+(z-p0.z)*e},()=>{const fq=$("fq");fq.classList.add("on");
+   setTimeout(()=>{inHall=false;busy=false;start("relax",i,true);setTimeout(()=>fq.classList.remove("on"),60)},220)}))}
+/* الخروج من الغرفة إلى الممر في أي وقت (تبقى الغرفة كما هي) */
+function doExitRoom(){if(inHall||$("game").hidden)return;const from=lvl;saveRoom();capturePreview(from);busy=true;const fq=$("fq");fq.classList.add("on");
+ setTimeout(()=>{enterHall(from);setTimeout(()=>fq.classList.remove("on"),60)},220)}
+function exitRoom(){if(inHall||busy)return;if(carry){say("ضع الغرض في مكانه أولًا، أو اتركه، ثم اخرج");return}
+ if(history.state&&history.state.s==="room")history.back();else doExitRoom()}
+function hallTap(x,y){if(busy)return;rc.setFromCamera(ndcOf(x,y),cam);const h=rc.intersectObjects(HALL.hits,false)[0];if(!h)return;const u=h.object.userData;
+ if(u.sw){if(Math.hypot(P.x-HW/2,P.z-(1.4-.75))<2.6){hallLight=!hallLight;applyHallLight();snd(hallLight?900:620,.05)}return}
+ if(u.door!=null){if(Math.hypot(P.x-hallSide(u.door)*HW/2,P.z-hallZ(u.door))>2.4)return;enterRoom(u.door)}}
+/* حلقة الممر: المشي والنظر بنفس التحكم، والدخول بالمشي نحو باب جانبي */
+function hallFrame(dt,t,now){
+ let mx=jx,my=jy;if(K.w||K.arrowup)my+=1;if(K.s||K.arrowdown)my-=1;if(K.d)mx+=1;if(K.a)mx-=1;
+ if(K.arrowleft)tgtYaw+=dt*1.8;if(K.arrowright)tgtYaw-=dt*1.8;
+ if(mouseIn&&playing()){if(mouseX<.06)tgtYaw+=dt*1.6*(1-mouseX/.06);else if(mouseX>.94)tgtYaw-=dt*1.6*((mouseX-.94)/.06)}
+ if(wheelD){const w=clamp(wheelD/(2*dt),-1,1);my+=w;wheelD-=w*2*dt;if(Math.abs(wheelD)<.005)wheelD=0}
+ if(!busy){yaw+=(tgtYaw-yaw)*Math.min(1,dt*14)}pitch+=(tgtPitch-pitch)*Math.min(1,dt*14);
+ {const l0=Math.hypot(mx,my);if(l0>1){mx/=l0;my/=l0}}
+ const ka=Math.min(1,dt*9);vMx+=(mx-vMx)*ka;vMy+=(my-vMy)*ka;if(Math.abs(vMx)<.002)vMx=0;if(Math.abs(vMy)<.002)vMy=0;mx=vMx;my=vMy;
+ const ml=Math.hypot(mx,my);
+ if(ml>.01&&!busy){const f=2*dt,fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw);P.x+=(fx*my+rx*mx)*f;P.z+=(fz*my+rz*mx)*f;walkT+=dt*Math.min(1,ml)}
+ if(!busy){P.x=clamp(P.x,-HW/2+.32,HW/2-.32);P.z=clamp(P.z,hallZ(L.length-1)-1.4+.45,1.4-.45);
+  if(ml>.01){const vx=-Math.sin(yaw)*my+Math.cos(yaw)*mx;for(let i=0;i<L.length;i++){const s=hallSide(i);if(Math.abs(P.z-hallZ(i))<.42&&s*P.x>HW/2-.36&&s*vx>.2){enterRoom(i);break}}}}
+ /* الأبواب تنفتح وحدها حين يقترب اللاعب فيرى داخل الغرفة، وتنغلق حين يبتعد */
+ let dMove=false;if(!busy)HALL.doors.forEach((d,i)=>{const s=hallSide(i),tg=Math.hypot(P.x-s*HW/2,P.z-hallZ(i))<2.3?1:0,o0=d.op||0;d.op=o0+(tg-o0)*Math.min(1,dt*4);if(Math.abs(d.op-o0)>.0005){d.leaf.rotation.y=s*1.4*d.op;dMove=true}});
+ if(dMove)needR=true;
+ cam.position.set(P.x,1.45+(ml>.01?Math.sin(walkT*9)*.012:0),P.z);cam.rotation.set(pitch,yaw,0);cam.updateMatrixWorld();
+ for(let i=tw.length-1;i>=0;i--){const a=tw[i];a.t+=dt;const u=Math.min(1,a.t/a.dur);a.fn(u);if(u>=1){tw.splice(i,1);a.done&&a.done()}}
+ if(now-sayChk>150){sayChk=now;refreshSay()}
+ const sig=P.x.toFixed(3)+","+P.z.toFixed(3)+","+yaw.toFixed(4)+","+pitch.toFixed(4)+","+cam.position.y.toFixed(4);
+ if((needR||sig!==lastSig||tw.length>0)&&!$("fade").classList.contains("on")){renderer.render(HALL.sc,cam);renderAt=now;lastSig=sig;needR=false}}
+
 function goNext(){
  if(busy||over||!doorOpen)return;const nl=nextL();busy=true;over=true;
  $("ftS").textContent="الغرفة "+(ordOf(nl)+1)+" من "+L.length;$("ftT").textContent=L[nl].name;
@@ -1129,26 +1231,27 @@ function goNext(){
 function unlockDoor(){doorOpen=true;
  doorLab=label("🚪 "+L[nextL()].name,2.6);doorLab.position.set(-1.6,2.6,R-.5);doorLab.scale.set(1.3,.34,1);roomG.add(doorLab);snd(660,.15)}
 function tapAt(x,y){
+ if(inHall){hallTap(x,y);return}
  if(over||busy)return;
+ if(roomSw){rc.setFromCamera(ndcOf(x,y),cam);if(rc.intersectObject(roomSw.hit,false).length&&distTo(-.82,R)<2.6){toggleRoomLight();return}}
  const it=pickItem(x,y);if(it){tryGrab(it);return}
  const z=zoneAt(x,y);
  if(z){if(carry)tryPlace(z);else say("احمل غرضًا أولًا، ثم اضغط على "+Z[z.k].n);return}
  if(doorHitAt(x,y)){
-  if(carry){say("ضع الغرض في مكانه أولًا");return}
-  if(!doorOpen){say("أكمل ترتيب هذه الغرفة أولًا، ثم يُفتح الباب");return}
   if(distTo(-1.6,R)>2.6){say("اقترب من الباب");return}
-  goNext();return}
+  exitRoom();return}
  if(carry){rc.setFromCamera(ndcOf(x,y),cam);
   /* أول ما يصيبه النقر في الغرفة: إن كان أعلى من الأرض فهو أثاث أو جدار، والأرض المقابلة له مخفية خلفه */
   const f=rc.intersectObjects(roomG.children,true)[0],onFloor=!!f&&f.point.y<.03;
   const h=rc.ray.intersectPlane(floorPlane,tmpB);tryDrop(h?tmpB.clone():null,onFloor)}}
 
 function interact(){
+ if(inHall){if(busy)return;let bi=-1,bd=1.7;for(let i=0;i<L.length;i++){const d=Math.hypot(P.x-hallSide(i)*HW/2,P.z-hallZ(i));if(d<bd){bd=d;bi=i}}if(bi>=0)enterRoom(bi);return}
  if(busy||over)return;
  const fx=-Math.sin(yaw),fz=-Math.cos(yaw);let best=null,bd=99;
  if(!carry){
   itemsG.children.forEach(it=>{if(it.userData.placed)return;const dx=it.position.x-P.x,dz=it.position.z-P.z,d=Math.hypot(dx,dz);if(d<=REACH&&(dx*fx+dz*fz)/Math.max(d,.01)>.4&&d<bd){bd=d;best=it}});
-  if(best)tryGrab(best);else if(doorOpen&&nearDoor())goNext();else say("لا يوجد غرض قريب أمامك");return}
+  if(best)tryGrab(best);else if(nearDoor())exitRoom();else say("لا يوجد غرض قريب أمامك");return}
  let bz=null;
  for(const k in ZN){const z=ZN[k],dx=z.g.position.x-P.x,dz=z.g.position.z-P.z,d=Math.hypot(dx,dz);if(d<=ZREACH&&(dx*fx+dz*fz)/Math.max(d,.01)>.4&&d<bd){bd=d;bz=z}}
  if(bz)tryPlace(bz);else tryDrop(null)}
@@ -1248,18 +1351,20 @@ function wrong(it,z){
 
 function calcStars(){if(mode==="relax")return mistakes<=1?3:mistakes<=3?2:1;const r=(end-Date.now())/1000/L[lvl].t;return r>.5?3:r>.2?2:1}
 function roomDone(){
- clearInterval(timer);$("bar").hidden=true;
- const st=calcStars();rstars[lvl]=st;saveBest(mode,lvl,st);snd(990,.3);unlockDoor();
- say("✨ "+L[lvl].name+" نظيفة! "+"⭐".repeat(st)+" الباب مفتوح، اخرج إلى "+L[nextL()].name)}
+ clearInterval(timer);$("bar").hidden=true;rdone=true;const st=calcStars();rstars[lvl]=st;saveBest(mode,lvl,st);saveRoom();snd(990,.3);
+ if(doneCount()>=L.length){setTimeout(finalScreen,700);return}
+ say("✨ "+L[lvl].name+" نظيفة! اخرج إلى الممر واختر غرفة أخرى")}
 function finish(win){
- if(win&&nextL()!==startL){roomDone();return}
+ if(win){roomDone();return}
  over=true;clearInterval(timer);$("res").hidden=false;const b1=$("b1");
  if(!win){$("rs").textContent="⏰";$("rt").textContent="انتهى الوقت!";$("rm").textContent="رتّبت "+(total-left)+" من "+total+" أغراض. حاول مرة ثانية، ستفعلها!";$("tip").textContent="نصيحة: ابدأ بالأغراض التي تعرف مكانها فورًا.";b1.textContent="أعد المحاولة";b1.onclick=()=>start(mode,lvl);return}
- const st=calcStars();rstars[lvl]=st;snd(990,.3);const rec=saveBest(mode,lvl,st);
+ }
+function finalScreen(){over=true;clearInterval(timer);$("res").hidden=false;const b1=$("b1");
+ const rec=false;
  const tot=Math.max(1,Math.min(3,Math.round(rstars.reduce((s,v)=>s+(v||0),0)/L.length)));
  $("rs").textContent="⭐".repeat(tot)+"☆".repeat(3-tot);$("tip").textContent=TIPS[Math.floor(Math.random()*TIPS.length)];
  $("rt").textContent="🎉 بيتنا نظيف بالكامل!";$("rm").textContent="رتّبت غرفتك وغرفة المعيشة وغرفة النوم والحمام والمطبخ. أنت بطل الترتيب!"+(rec?" رقم قياسي جديد! 🏆":"");
- b1.textContent="العب من جديد";b1.onclick=()=>start(mode,startL);
+ b1.textContent="العب من جديد";b1.onclick=()=>{for(const k in ROOMS)delete ROOMS[k];$("res").hidden=true;startGame()};
 }
 
 /* ============ حلقة الرسم ============ */
@@ -1270,6 +1375,7 @@ let last=performance.now(),dpShown=false;
 function frame(now){
  const dt=Math.min(.05,(now-last)/1000),t=now/1000;last=now;
  if(hallRun){hallRun.step(dt);renderer.render(hallRun.sc,cam);requestAnimationFrame(frame);return}
+ if(inHall&&!$("game").hidden&&HALL){hallFrame(dt,t,now);requestAnimationFrame(frame);return}
  if(!$("game").hidden){
   let mx=jx,my=jy;if(K.w||K.arrowup)my+=1;if(K.s||K.arrowdown)my-=1;if(K.d)mx+=1;if(K.a)mx-=1;
   if(K.arrowleft)tgtYaw+=dt*1.8;if(K.arrowright)tgtYaw-=dt*1.8;
@@ -1289,13 +1395,13 @@ function frame(now){
   /* الخروج بالمشي: إذا فُتح الباب ومشى اللاعب نحوه حتى وصل إلى عتبته، ينتقل إلى الغرفة التالية (إضافةً إلى النقر على الباب) */
   if(doorOpen&&!busy&&!over&&ml>.01&&Math.abs(P.x+1.6)<.55&&P.z>R-.55){
    const vz=-Math.cos(yaw)*my-Math.sin(yaw)*mx;/* مكوّن الحركة نحو جدار الباب (+z) */
-   if(vz>.2){if(!carry)goNext();else if(!sayDoorT||t-sayDoorT>3){sayDoorT=t;say("ضع الغرض في مكانه أولًا، ثم اخرج من الباب")}}}
+   if(vz>.2){if(!carry)exitRoom();else if(!sayDoorT||t-sayDoorT>3){sayDoorT=t;say("ضع الغرض في مكانه أولًا، ثم اخرج من الباب")}}}
   cam.position.set(P.x,1.45+(ml>.01?Math.sin(walkT*9)*.012:0),P.z);cam.rotation.set(pitch,yaw,0);cam.updateMatrixWorld();
   if(!reaching)hand.position.lerp(carry?HCARRY:HIDLE,Math.min(1,dt*8));
   /* اليدان مخفيتان إلا عند المدّ للغرض وحمله */
   hand.visible=!!carry||reaching||hand.position.y>-.7;
   updateHands(dt,t);
-  if(doorLeaf){doorO+=((doorOpen?1:0)-doorO)*Math.min(1,dt*5);doorLeaf.rotation.y=doorO*1.6;if(doorMat){doorMat.emissive.setHex(0xffc93c);doorMat.emissiveIntensity=doorOpen?.22+.18*Math.sin(t*5):0}}
+  if(doorLeaf){doorO+=((doorOpen?1:0)-doorO)*Math.min(1,dt*5);doorLeaf.rotation.y=doorO*1.6;if(doorMat){doorMat.emissive.setHex(0xffc93c);doorMat.emissiveIntensity=rdone?.22+.18*Math.sin(t*5):0}}
   for(let i=tw.length-1;i>=0;i--){const a=tw[i];a.t+=dt;const u=Math.min(1,a.t/a.dur);a.fn(u);if(u>=1){tw.splice(i,1);a.done&&a.done()}}
   for(const it of fall){const u=it.userData;u.vy-=14*dt;it.position.y+=u.vy*dt;it.rotation.x*=.9;it.rotation.z*=.9;
    if(it.position.y<=0){it.position.y=0;if(Math.abs(u.vy)>1.2)u.vy=-u.vy*.32;else{u.vy=0;fall.delete(it)}}}
@@ -1314,18 +1420,20 @@ function frame(now){
   const sd=!!carry&&!busy;if(sd!==dpShown){$("dp").hidden=!sd;dpShown=sd}
   /* المطلوب الآن في فقاعة الولد، والسهم يشير إلى مكان الغرض المحمول أو إلى الباب المفتوح */
   if(now-sayChk>150){sayChk=now;refreshSay();
-   let tx=null,tz=null;if(carry&&ZN[carry.userData.k]){const g=ZN[carry.userData.k].g.position;tx=g.x;tz=g.z}else if(doorOpen){tx=-1.6;tz=R}
+   let tx=null,tz=null;if(carry&&ZN[carry.userData.k]){const g=ZN[carry.userData.k].g.position;tx=g.x;tz=g.z}else if(rdone){tx=-1.6;tz=R}
    const aw=$("arw");if(tx===null){aw.hidden=true}else{const dx=tx-P.x,dz=tz-P.z,lx=dx*Math.cos(yaw)-dz*Math.sin(yaw),ly=-dx*Math.sin(yaw)-dz*Math.cos(yaw);
     aw.hidden=false;aw.style.transform="rotate("+(Math.atan2(lx,ly)*180/Math.PI).toFixed(0)+"deg)"}}
   const sig=P.x.toFixed(3)+","+P.z.toFixed(3)+","+yaw.toFixed(4)+","+pitch.toFixed(4)+","+cam.position.y.toFixed(4);
   if(needR||tw.length>0||fall.size>0||zMoving||Math.abs(doorO-(doorOpen?1:0))>.002)renderer.shadowMap.needsUpdate=true;
   const active=needR||sig!==lastSig||tw.length>0||fall.size>0||!!carry||reaching||hand.visible||zMoving||Math.abs(doorO-(doorOpen?1:0))>.002;
   const covered=!$("res").hidden||$("fade").classList.contains("on");
-  if(!covered&&(active||((ringOn||doorOpen)&&now-renderAt>32))){renderer.render(scene,cam);renderAt=now;lastSig=sig;needR=false}
+  if(!covered&&(active||((ringOn||rdone)&&now-renderAt>32))){renderer.render(scene,cam);renderAt=now;lastSig=sig;needR=false}
  }
  requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+/* الدخول مباشرة إلى الشقة (الممر) خلف شاشة التحميل */
+setTimeout(()=>{try{startGame()}catch(e){console.error(e)}},0);
 setTimeout(()=>window.hideSplash&&window.hideSplash(),Math.max(0,3000-(Date.now()-(window.__t0||Date.now()))));
 
 /* ============ الأزرار ============ */
@@ -1334,16 +1442,12 @@ $("mt").onclick=()=>{muted=!muted;try{localStorage.setItem("roomgame.mute",muted
 /* أزرار غرفة البداية: تُحفظ آخر غرفة اختارها اللاعب */
 const RICON={kids:"🧸",living:"🛋️",bed:"🛏️",bath:"🛁",kitchen:"🍳"};let selL=0;
 try{selL=Math.min(L.length-1,Math.max(0,+localStorage.getItem("roomgame.start")||0))}catch(e){}
-const hex=c=>"#"+c.toString(16).padStart(6,"0");
-const paintRooms=()=>{$("rooms").innerHTML=L.map((r,i)=>
-  '<button class="room" data-i="'+i+'" style="--rc:'+hex(r.wall)+'"><span class="ri">'+RICON[r.id]+'</span><b>'+r.name+'</b><span class="go" aria-hidden="true">◀</span></button>').join("")};
-window.__paintRooms=paintRooms;
-$("rooms").onclick=e=>{const b=e.target.closest(".room");if(!b)return;selL=+b.dataset.i;try{localStorage.setItem("roomgame.start",String(selL))}catch(e){}start("relax",selL)};paintRooms();
+$("play").onclick=startGame;window.__paintRooms=()=>{};
 /* العودة إلى الغرف: من زر الرجوع في الهاتف أو المتصفح، أو من زر الرجوع والقائمة داخل اللعبة (يستهلكان الخطوة نفسها) */
 const goHome=()=>{clearInterval(timer);over=true;show("home")};
-addEventListener("popstate",()=>{if(!$("game").hidden)goHome()});
-const backHome=()=>{if(history.state&&history.state.s==="game")history.back();else goHome()};
-$("b2").onclick=backHome;
+addEventListener("popstate",()=>{if($("game").hidden)return;const st=history.state&&history.state.s;if(!inHall&&st==="game")doExitRoom();else if(!st){inHall=false;goHome()}});
+const backHome=()=>{if(!inHall){exitRoom();return}if(history.state&&history.state.s==="game")history.back();else{inHall=false;goHome()}};
+$("b2").onclick=()=>{for(const k in ROOMS)delete ROOMS[k];inHall=false;$("res").hidden=true;goHome();try{history.replaceState(null,"")}catch(e){}};
 $("back").onclick=backHome;
 $("nl").onclick=()=>turn(90);$("nr").onclick=()=>turn(-90);$("dp").onclick=()=>tryDrop(null);
 addEventListener("keydown",e=>{
@@ -1351,6 +1455,7 @@ addEventListener("keydown",e=>{
  const k=e.key.toLowerCase();
  if(["w","a","s","d","arrowup","arrowdown","arrowleft","arrowright"].includes(k)){K[k]=1;e.preventDefault();return}
  if((k==="e"||k==="enter"||k===" ")&&document.activeElement.tagName!=="BUTTON"){e.preventDefault();interact();return}
+ if(k==="l"){if(inHall){hallLight=!hallLight;applyHallLight()}else toggleRoomLight();return}
  if(k==="q"&&carry)tryDrop(null)});
 addEventListener("keyup",e=>{delete K[e.key.toLowerCase()]});
 addEventListener("blur",()=>{for(const k in K)delete K[k]});
