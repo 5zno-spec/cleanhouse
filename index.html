@@ -264,7 +264,7 @@ Z.bed.items=[kPillow,kBlank,Z.toys.items[0]];
 Z.laundry.items=[0,1,2,5].map(i=>Z.closet.items[i]);
 /* الشقة: خمس غرف بالترتيب، وكل غرفة لها باب تخرج منه إلى التي بعدها */
 const L=[
- {id:"kids",name:"غرفتك",z:["closet","shelf","toys"],n:6,t:40,wall:0xffc2b3,floor:"wood",rug:1},
+ {id:"kids",name:"غرفتك",z:["closet","shelf","toys","desk"],n:8,t:40,wall:0xffc2b3,floor:"wood",rug:1},
  {id:"living",name:"غرفة المعيشة",z:["sofa","shelf","toys","trash"],n:8,t:50,wall:0xffe08a,floor:"wood",rug:1},
  {id:"bed",name:"غرفة النوم",z:["bed","closet","shelf","trash"],n:9,t:55,wall:0xcdb4f5,floor:"wood",rug:1},
  {id:"bath",name:"الحمام",z:["cabinet","laundry","trash"],n:9,t:55,wall:0x9fe3de,floor:"tile",rug:0},
@@ -388,6 +388,15 @@ function mkCloset(){
   g.add(p);return p};
  const pl=door(-1),pr=door(1);
  return{g,hit:[W+.1,H+.1,D+.5],hz:.15,slots:[[-.5,.1,0],[0,.1,0],[.5,.1,0]],lab:H+.2,anim:o=>{pl.rotation.y=-o*1.9;pr.rotation.y=o*1.9},parts:[pl,pr],fit:[.45,.78,.5],ap:[0,.05,.65]}}
+function mkDesk(){
+ const g=new THREE.Group(),W=1.4,H=.75,D=.6,wd=M(0xd9a066,.55),dk=M(0xa8703c,.6),seat=M(0x35a7ff,.6);
+ g.add(bx(W,.05,D,wd,0,H-.025,0),bx(.05,H-.05,D-.04,dk,-W/2+.03,(H-.05)/2,0),bx(.42,H-.05,D-.04,dk,W/2-.23,(H-.05)/2,0),bx(W-.1,.3,.02,dk,0,H-.2,-D/2+.02));
+ [.18,.42].forEach(y=>g.add(bx(.38,.2,.02,wd,W/2-.23,y,D/2-.01),bx(.1,.02,.02,MET(),W/2-.23,y+.02,D/2+.01)));
+ /* مصباح مكتب صغير */
+ g.add(cy(.07,.08,.02,BLK(),-W/2+.15,H+.01,-.18,16),R3(cy(.01,.01,.3,MET(),-W/2+.15,H+.16,-.18,8),0,0,.25),R3(cy(.05,.09,.1,M(0xffc93c,.5),-W/2+.2,H+.3,-.18,16),0,0,-.5));
+ /* كرسي أمام المكتب */
+ const c=new THREE.Group();c.position.set(-.15,0,D/2+.32);c.add(bx(.42,.05,.4,seat,0,.45,0),bx(.42,.4,.05,seat,0,.68,.18));[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>c.add(bx(.04,.43,.04,dk,a*.18,.215,b*.17)));g.add(c);
+ return{g,hit:[W+.1,H+.6,D+.4],hz:.1,slots:[[-.4,H,.02],[-.08,H,.05],[.22,H,.02],[.52,H,.05]],lab:1.45,fit:[.3,.32,.4],ap:[0,.35,.3]}}
 function mkShelf(){
  const g=new THREE.Group(),W=1.9,H=2.1,D=.4,t=.05,wd=M(0xa8703c,.6),inn=M(0x6b4425,.9);
  g.add(bx(t,H,D,wd,-W/2+t/2,H/2,0),bx(t,H,D,wd,W/2-t/2,H/2,0),bx(W,t,D,wd,0,H-t/2,0),bx(W,.08,D,wd,0,.04,0),bx(W-2*t,H,.02,inn,0,H/2,-D/2+.01));
@@ -449,7 +458,17 @@ function outline(root,th=.007){
   const m=new THREE.Mesh(g,OUTL);m.scale.set(fx,fy,fz);m.position.set(c.x*(1-fx),c.y*(1-fy),c.z*(1-fz));m.castShadow=false;m.receiveShadow=false;o.add(m)});
  return root}
 const [kShirt,kPants,kSock,kCap,kJacket,kDress]=Z.closet.items,[kBook,kPencil,kBag,kNote,kCrayon,kRuler]=Z.shelf.items,[kBear,kCar,kPuzzle,kBall,kKite,kDice]=Z.toys.items,[kBanana,kJuice,kCup,kPaper]=Z.trash.items,[kMilk,kBowl,kCutlery,kMug]=Z.kitchen.items;
+/* الكتب مكانها المكتبة، والأدوات الدراسية (القلم والألوان والمسطرة والدفتر والحقيبة) مكانها المكتب */
+const kBookB="\u{1F4D8}",kBookG="\u{1F4D7}";
+Z.desk={n:"المكتب",items:[kPencil,kCrayon,kRuler,kNote,kBag]};Z.shelf={n:"المكتبة",items:[kBook,kBookB,kBookG]};
+Object.assign(NM,{[kBook]:"الكتاب الأحمر",[kBookB]:"الكتاب الأزرق",[kBookG]:"الكتاب الأخضر"});
+Object.assign(WHY,{shelf:"الكتب مكانها المكتبة، مصفوفة على الرف.",desk:"الأدوات الدراسية مكانها المكتب لتجدها وقت الواجب."});
+/* كتاب بغلاف ملوّن (نفس شكل الكتاب الأحمر) */
+const bookM=(c1,c2)=>()=>{const cv=M(c1,.7),pg=M(0xfff3da,.9),gd=M(c2,.6);
+ return Gp(flatRect(.2,.27,.012,.012,cv,0,.006,0),flatRect(.186,.256,.028,.006,pg,.004,.026,0),flatRect(.2,.27,.012,.012,cv,0,.044,0),R3(cy(.026,.026,.268,cv,-.098,.025,0,18),Math.PI/2,0,0),el(.034,.004,.034,gd,.005,.0505,.03),el(.016,.0045,.016,cv,.005,.051,.03),flatRect(.12,.04,.006,.002,pg,.005,.0505,-.07),flatRect(.02,.07,.004,.0015,gd,.06,.04,.15))};
 const MK={
+[kBookB]:bookM(0x35a7ff,0xffffff),
+[kBookG]:bookM(0x1fb5a5,0xffc93c),
 [kShirt]:()=>{const m=M(0x35a7ff,.8),tr=M(0xffffff,.8),ye=M(0xffc93c,.7);
  const s=smoothShape([[-.045,.125],[0,.1],[.045,.125],[.1,.12],[.165,.06],[.145,-.005],[.098,.012],[.095,-.125],[-.095,-.125],[-.098,.012],[-.145,-.005],[-.165,.06],[-.1,.12]]);
  return Gp(puff(s,.034,.012,m,0,.017,0,true),R3(tor(.036,.007,Math.PI*2,tr,0,.035,-.112),Math.PI/2,0,0),el(.03,.004,.03,ye,0,.036,.02),el(.014,.0045,.014,tr,0,.0365,.02))},
@@ -607,7 +626,7 @@ function layoutRoom(cfg){
  const FZ=D=>-R+D/2+.02,id=cfg.id,Zn=(k,f,x,z,ry)=>mkZone(k,f,x,z,ry);
  /* صندوق الألعاب على الجدار الشرقي بعيدًا عن النافذة (النافذة تمتد z بين −1.05 و1.05)، كي لا يخترق غطاؤه المفتوح إطارها */
  const TZ=1.8;
- if(id==="kids"){Zn("closet",mkCloset,0,FZ(.7),0);Zn("shelf",mkShelf,-R+.22,0,Math.PI/2);Zn("toys",mkToys,R-.4,TZ,-Math.PI/2)}
+ if(id==="kids"){Zn("closet",mkCloset,0,FZ(.7),0);Zn("shelf",mkShelf,-R+.22,0,Math.PI/2);Zn("toys",mkToys,R-.4,TZ,-Math.PI/2);Zn("desk",mkDesk,.95,R-.36,Math.PI)}
  else if(id==="living"){Zn("sofa",mkSofa,0,FZ(.95),0);Zn("shelf",mkShelf,-R+.22,0,Math.PI/2);Zn("toys",mkToys,R-.4,TZ,-Math.PI/2);Zn("trash",mkTrash,2.55,-R+.45,0);
   mkDecor(dTV,1.2,R-.245,Math.PI);mkDecor(()=>dTable(1.0,.6,.4,M(0x6b4a2c,.6)),0,-1.6,0)}
  else if(id==="bed"){Zn("bed",mkBed,1.5,-R+1.02,0);Zn("closet",mkCloset,-1.2,FZ(.7),0);Zn("shelf",mkShelf,-R+.22,0,Math.PI/2);Zn("trash",mkTrash,1.2,R-.4,Math.PI);mkDecor(dNight,.3,-R+.22,0)}
@@ -1196,7 +1215,7 @@ function placePose(it,z,slot){
 /* نقطة الاقتراب: أمام الخزانة والرف والثلاجة، وفوق الصندوق والسلال والأريكة والسرير */
 const approachOf=(z,pt)=>pt.clone().add(new THREE.Vector3(...z.ap).applyQuaternion(z.g.getWorldQuaternion(new THREE.Quaternion())));
 /* صوت إنجاز فرح: أربع نغمات صاعدة (دو مي صول دو) ثم بريق خفيف */
-function cheer(){if(muted)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const t0=ac.currentTime+.05;
+function cheer(){if(muted)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const t0=ac.currentTime+.01;
  [523.25,659.25,783.99,1046.5].forEach((fq,i)=>{const t=t0+i*.075,o=ac.createOscillator(),o2=ac.createOscillator(),g=ac.createGain(),top=i===3;
   o.type="triangle";o.frequency.value=fq;o2.type="sine";o2.frequency.value=fq*2;
   g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(top?.07:.05,t+.015);g.gain.exponentialRampToValueAtTime(.0001,t+(top?.55:.22));
@@ -1212,11 +1231,11 @@ function correct(it,z,soft){
  tween(.26,t=>{const e=t*t*(3-2*t);it.position.lerpVectors(p0,A,e);it.scale.setScalar(s0+(pp.k-s0)*e);it.quaternion.slerpQuaternions(q0,pp.q,e)},
   ()=>tween(.3,t=>{const e=1-Math.pow(1-t,3);it.position.lerpVectors(A,pp.p,e)},()=>{it.position.copy(pp.p);it.quaternion.copy(pp.q);it.scale.setScalar(pp.k)}));
  tween(.35,t=>z.g.scale.setScalar(1+.015*Math.sin(Math.PI*t)),()=>z.g.scale.setScalar(1));
- starAt(z);setTimeout(()=>sfx(z.k),420);setTimeout(cheer,480);
+ starAt(z);setTimeout(()=>sfx(z.k),420);setTimeout(()=>{cheer();if(mode!=="time"&&left>0)praise()},480);
  left--;hud();
  if(left===0){say("");setTimeout(()=>finish(true),700)}
  else if(mode==="time"){streak++;const b=streak>=3?3:2;end=Math.min(end+b*1000,Date.now()+L[lvl].t*1000);say("+"+b+" ثوانٍ ⏱️"+(streak>=3?"  تتابع ×"+streak+" 🔥":""))}
- else praise();
+ 
 }
 function wrong(it,z){
  const u=it.userData;mistakes++;snd(220,.2);
