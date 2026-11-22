@@ -2,10 +2,10 @@
    الصفحة تُجلب من الشبكة أولًا (فيرى اللاعب آخر تحديث) وتُعرض النسخة المحفوظة عند انقطاع الاتصال،
    والصور ومكتبة Three.js والخط تُقدَّم من الجهاز بعد حفظها.
    عند أي تعديل على اللعبة ارفع رقم VERSION ليُحذف الحفظ القديم عند اللاعبين. */
-const VERSION = 'v6';
+const VERSION = 'v7';
 const CACHE = 'beitna-' + VERSION;
 const CORE = [
-  './', 'index.html', 'manifest.webmanifest',
+  './', 'index.html', 'style.css', 'game.js', 'manifest.webmanifest',
   'img/logo.webp', 'img/boy.png', 'img/girl.png', 'img/dev-logo.png', 'img/favicon-32.png', 'img/apple-touch-icon.png',
   'img/icon-192.png', 'img/icon-512.png', 'img/icon-maskable-512.png',
   'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js'
