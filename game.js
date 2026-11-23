@@ -870,7 +870,7 @@ function tryDrop(wp,onFloor){
  reach(new THREE.Vector3(q.x,.25,q.z),.3,()=>{
   itemsG.attach(it);carry=null;setCast(it,true);it.userData.vy=0;fall.add(it);
   const x0=it.position.x,z0=it.position.z;tween(.3,t=>{it.position.x=x0+(q.x-x0)*t;it.position.z=z0+(q.z-z0)*t});
-  tween(.2,()=>{},()=>retreat(HIDLE));say("")})}
+  tween(.2,()=>{},()=>retreat(HIDLE));say("");setTimeout(persist,400)})}
 
 function doorHitAt(x,y){rc.setFromCamera(ndcOf(x,y),cam);return rc.intersectObjects(doorHits,false).length>0}
 function nearDoor(){const dx=-1.6-P.x,dz=R-P.z,d=Math.hypot(dx,dz);return d<=2.3&&(dx*-Math.sin(yaw)+dz*-Math.cos(yaw))/Math.max(d,.01)>.35}
@@ -935,7 +935,30 @@ function hallWalk(a,b,done){
 const ROOMS={};let inHall=false,rdone=false,roomLight=true,hallLight=true,roomSw=null;
 const doneCount=()=>L.reduce((s,r,i)=>s+(((ROOMS[i]&&ROOMS[i].done)||(i===lvl&&!inHall&&rdone))?1:0),0);
 /* حفظ حالة الغرفة الحالية: أين كل غرض، وما وُضع منها في مكانه، وهل نظفت، وهل اللمبة مضاءة */
-function saveRoom(){if(lvl==null)return;ROOMS[lvl]={items:itemsG.children.map(it=>({e:it.userData.e,k:it.userData.k,placed:!!it.userData.placed,x:it.position.x,z:it.position.z,ry:it.rotation.y})),done:rdone,mistakes,light:roomLight}}
+function roomState(){const items=itemsG.children.map(it=>({e:it.userData.e,k:it.userData.k,placed:!!it.userData.placed,x:it.position.x,z:it.position.z,ry:it.rotation.y}));
+ /* الغرض المحمول في اليد يُحفظ على الأرض عند قدمي اللاعب كي لا يضيع */
+ if(carry&&carry.userData)items.push({e:carry.userData.e,k:carry.userData.k,placed:false,x:P.x,z:P.z,ry:0});
+ return{items,done:rdone,mistakes,light:roomLight}}
+function saveRoom(){if(lvl==null)return;ROOMS[lvl]=roomState();persist()}
+/* ============ تذكّر التقدم: حالة كل غرفة والنجوم وإضاءة الممر تُحفظ في المتصفح، فيعود اللاعب إلى بيته كما تركه ============ */
+const PK="roomgame.progress.v1";
+function persist(){try{const rooms=Object.assign({},ROOMS);
+ /* داخل غرفة الآن: نحفظ حالتها الحية لا آخر نسخة عند الدخول */
+ const inGame=!$("game").hidden;if(!inHall&&lvl!=null&&ROOMS[lvl]&&inGame)rooms[lvl]=roomState();
+ /* أين يقف اللاعب الآن (الممر أو غرفة)، ليعود إلى المكان نفسه عند فتح اللعبة */
+ const at=!inGame?null:inHall?{h:1,x:P.x,z:P.z,yaw}:(lvl!=null&&ROOMS[lvl]?{r:lvl,x:P.x,z:P.z,yaw}:null);
+ localStorage.setItem(PK,JSON.stringify({rooms,stars:rstars,hall:hallLight,at}))}catch(e){}}
+function clearProgress(){try{localStorage.removeItem(PK)}catch(e){}}
+let RESUME=null;
+(function loadProgress(){try{const o=JSON.parse(localStorage.getItem(PK)||"null");if(!o||!o.rooms)return;
+ const ok={};for(const i in o.rooms){const r=o.rooms[i],cfg=L[i];
+  /* نتجاهل أي غرفة لا تطابق الغرف الحالية (بعد تحديث اللعبة مثلًا) */
+  if(!cfg||!r||!Array.isArray(r.items)||!r.items.every(s=>s&&cfg.z.includes(s.k)&&isFinite(s.x)&&isFinite(s.z)))continue;ok[i]=r}
+ /* بيت نظيف بالكامل سبق أن رأى اللاعب شاشة النهاية فيه: نبدأ بيتًا جديدًا */
+ if(L.every((r,i)=>ok[i]&&ok[i].done)){clearProgress();return}
+ Object.assign(ROOMS,ok);if(Array.isArray(o.stars))rstars=o.stars;if(typeof o.hall==="boolean")hallLight=o.hall;
+ const a=o.at;if(a&&isFinite(a.x)&&isFinite(a.z)&&isFinite(a.yaw)&&(a.h||(a.r!=null&&ok[a.r])))RESUME=a}catch(e){}})();
+addEventListener("visibilitychange",()=>{if(document.hidden)persist()});addEventListener("pagehide",persist);
 /* مفتاح إضاءة على الجدار: لوحة بيضاء وزر يتحرك */
 function lightSwitch(parent,x,y,z,ry){const g=new THREE.Group();g.position.set(x,y,z);g.rotation.y=ry;
  const tog=bx(.035,.06,.03,M(0xdddddd,.3),0,0,.014);g.add(bx(.1,.15,.015,M(0xffffff,.4),0,0,0),tog);
@@ -944,7 +967,7 @@ function lightSwitch(parent,x,y,z,ry){const g=new THREE.Group();g.position.set(x
 function lampMats(root,on){root.traverse(o=>{const m=o.material;if(m&&m.isMeshStandardMaterial&&m.emissive){if(m.userData.ei===undefined)m.userData.ei=m.emissiveIntensity;m.emissiveIntensity=on?m.userData.ei:0}})}
 /* إضاءة الغرفة: عند الإطفاء يبقى ضوء النافذة، وتخفت الإضاءة العامة، وتنطفئ اللمبة */
 function applyRoomLight(){const on=roomLight;hemi.intensity=on?1.8:.5;lamp.intensity=on?1.5:0;sun.intensity=on?1.4:1.05;if(roomG)lampMats(roomG,on);if(roomSw)roomSw.tog.rotation.x=on?-.4:.4;needR=true}
-function toggleRoomLight(){roomLight=!roomLight;applyRoomLight();snd(roomLight?900:620,.05)}
+function toggleRoomLight(){roomLight=!roomLight;applyRoomLight();snd(roomLight?900:620,.05);persist()}
 /* صورة حقيقية لداخل كل غرفة (من عند بابها) تظهر في الممر من خلال فتحة الباب قبل الدخول */
 const PREV={};
 function capturePreview(i){const rt=PREV[i]||(PREV[i]=new THREE.WebGLRenderTarget(440,520,{samples:2}));rt.texture.colorSpace=THREE.SRGBColorSpace;
@@ -952,7 +975,7 @@ function capturePreview(i){const rt=PREV[i]||(PREV[i]=new THREE.WebGLRenderTarge
  const hv=hand.visible;hand.visible=false;renderer.shadowMap.needsUpdate=true;renderer.setRenderTarget(rt);renderer.render(scene,pc);renderer.setRenderTarget(null);hand.visible=hv;needR=true;
  if(HALL&&HALL.doors[i].behind.material.map!==rt.texture){HALL.doors[i].behind.material.map=rt.texture;HALL.doors[i].behind.material.color.set(0xffffff);HALL.doors[i].behind.material.needsUpdate=true}}
 /* تجهيز الغرف التي لم تُزر: تُبنى بصمت مرة واحدة فتُحفظ أماكن أغرضها وتُلتقط صورتها */
-function prepRooms(){for(let i=0;i<L.length;i++){if(ROOMS[i])continue;start("relax",i,true,true);saveRoom();capturePreview(i)}}
+function prepRooms(){for(let i=0;i<L.length;i++){if(ROOMS[i]&&PREV[i])continue;/* غرفة محفوظة من زيارة سابقة: تُبنى كما تُركت لالتقاط صورتها */start("relax",i,true,true);saveRoom();capturePreview(i)}}
 function augmentHall(){HALL.hits=[];
  /* خلف كل باب: لوح كبير عليه صورة داخل الغرفة (الجدران حول الفتحة تقصّه بحجم الباب) */
  HALL.doors.forEach((d,i)=>{const s=hallSide(i);d.behind.geometry.dispose();d.behind.geometry=new THREE.PlaneGeometry(2.2,2.6);d.behind.position.set(s*(HW/2+.9),1.3,hallZ(i));
@@ -972,7 +995,11 @@ function enterHall(from){autoGo=null;
  hand.visible=false;$("dp").hidden=true;dpShown=false;$("bar").hidden=true;
  if(from==null){P.x=0;P.z=1.4-.9;yaw=tgtYaw=0}else{const s=hallSide(from);P.x=s*(HW/2-.55);P.z=hallZ(from);yaw=tgtYaw=s<0?-Math.PI/2:Math.PI/2}
  pitch=tgtPitch=-.08;vMx=vMy=0;needR=true;hud();say("")}
-function startGame(){mode="relax";prepRooms();show("game");fit();try{if(!history.state||history.state.s!=="game")history.pushState({s:"game"},"")}catch(e){}enterHall(null)}
+function startGame(){mode="relax";prepRooms();show("game");fit();try{if(!history.state||history.state.s!=="game")history.pushState({s:"game"},"")}catch(e){}
+ /* العودة إلى مكان الإغلاق: داخل الغرفة نفسها (والممر خلفها للخروج)، أو في الموضع نفسه من الممر */
+ const at=RESUME;RESUME=null;
+ if(at&&at.r!=null&&ROOMS[at.r]){enterHall(+at.r);inHall=false;start("relax",+at.r,true);P.x=at.x;P.z=at.z;yaw=tgtYaw=at.yaw;pushOut(P,PR);return}
+ enterHall(null);if(at&&at.h){P.x=at.x;P.z=at.z;yaw=tgtYaw=at.yaw}}
 /* دخول غرفة من الممر: يلتفت إلى بابها فينفتح، ويخطو إليه، ثم تظهر الغرفة */
 function enterRoom(i){if(busy)return;busy=true;const d=HALL.doors[i],s=hallSide(i),z=hallZ(i),p0={x:P.x,z:P.z},y0=yaw,ty=nearest(y0,s<0?Math.PI/2:-Math.PI/2);
  tween(.45,u=>{const e=u*u*(3-2*u);d.leaf.rotation.y=s*1.4*e;tgtYaw=yaw=y0+(ty-y0)*e},()=>
@@ -984,7 +1011,7 @@ function doExitRoom(){if(inHall||$("game").hidden)return;const from=lvl;saveRoom
 function exitRoom(){if(inHall||busy)return;if(carry){say("ضع الغرض في مكانه أولًا، أو اتركه، ثم اخرج");return}
  if(history.state&&history.state.s==="room")history.back();else doExitRoom()}
 function hallTap(x,y){if(busy)return;rc.setFromCamera(ndcOf(x,y),cam);const h=rc.intersectObjects(HALL.hits,false)[0];if(!h)return;const u=h.object.userData;
- if(u.sw){if(Math.hypot(P.x-HW/2,P.z-(1.4-.75))<2.6){hallLight=!hallLight;applyHallLight();snd(hallLight?900:620,.05)}return}
+ if(u.sw){if(Math.hypot(P.x-HW/2,P.z-(1.4-.75))<2.6){hallLight=!hallLight;applyHallLight();snd(hallLight?900:620,.05);persist()}return}
  if(u.door!=null){const i=u.door,s=hallSide(i);if(Math.hypot(P.x-s*HW/2,P.z-hallZ(i))>3.2)return;enterRoom(i)}}
 /* حلقة الممر: المشي والنظر بنفس التحكم، والدخول بالمشي نحو باب جانبي */
 function hallFrame(dt,t,now){
@@ -1118,7 +1145,7 @@ function cheer(){if(muted)return;try{ac=ac||new(window.AudioContext||window.webk
   g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.022,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+.14);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.15)}
 }catch(e){}}
 function correct(it,z,soft){
- const u=it.userData;u.placed=true;fall.delete(it);
+ const u=it.userData;u.placed=true;fall.delete(it);setTimeout(persist,0);
  const slot=z.slots[(z.n++)%z.slots.length].clone(),pp=placePose(it,z,slot),A=approachOf(z,pp.p);z.items.push(it);
  const p0=it.position.clone(),s0=it.scale.x,q0=it.quaternion.clone();
  /* مرحلتان: إلى نقطة الاقتراب (أمام الخانة أو فوق الصندوق)، ثم يدخل الغرض بهدوء ويستقر في مكانه */
@@ -1155,7 +1182,7 @@ function finalScreen(){over=true;clearInterval(timer);$("res").hidden=false;cons
  const tot=Math.max(1,Math.min(3,Math.round(rstars.reduce((s,v)=>s+(v||0),0)/L.length)));
  $("rs").textContent="⭐".repeat(tot)+"☆".repeat(3-tot);$("tip").textContent=TIPS[Math.floor(Math.random()*TIPS.length)];
  $("rt").textContent="🎉 بيتنا نظيف بالكامل!";$("rm").textContent="رتّبت غرفتك وغرفة المعيشة وغرفة النوم والحمام والمطبخ. أنت بطل الترتيب!"+(rec?" رقم قياسي جديد! 🏆":"");
- b1.textContent="العب من جديد";b1.onclick=()=>{for(const k in ROOMS)delete ROOMS[k];$("res").hidden=true;startGame()};
+ b1.textContent="العب من جديد";b1.onclick=()=>{for(const k in ROOMS)delete ROOMS[k];rstars=[];clearProgress();$("res").hidden=true;startGame()};
 }
 
 /* ============ حلقة الرسم ============ */
@@ -1238,7 +1265,7 @@ $("play").onclick=startGame;window.__paintRooms=()=>{};
 const goHome=()=>{clearInterval(timer);over=true;show("home")};
 addEventListener("popstate",()=>{if($("game").hidden)return;const st=history.state&&history.state.s;if(!inHall&&st==="game")doExitRoom();else if(!st){inHall=false;goHome()}});
 const backHome=()=>{if(!inHall){exitRoom();return}if(history.state&&history.state.s==="game")history.back();else{inHall=false;goHome()}};
-$("b2").onclick=()=>{for(const k in ROOMS)delete ROOMS[k];inHall=false;$("res").hidden=true;goHome();try{history.replaceState(null,"")}catch(e){}};
+$("b2").onclick=()=>{for(const k in ROOMS)delete ROOMS[k];rstars=[];clearProgress();inHall=false;$("res").hidden=true;goHome();try{history.replaceState(null,"")}catch(e){}};
 $("back").onclick=backHome;
 $("nl").onclick=()=>turn(90);$("nr").onclick=()=>turn(-90);$("dp").onclick=()=>tryDrop(null);
 addEventListener("keydown",e=>{

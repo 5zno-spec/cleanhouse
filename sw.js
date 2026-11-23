@@ -2,7 +2,7 @@
    الصفحة تُجلب من الشبكة أولًا (فيرى اللاعب آخر تحديث) وتُعرض النسخة المحفوظة عند انقطاع الاتصال،
    والصور ومكتبة Three.js والخط تُقدَّم من الجهاز بعد حفظها.
    عند أي تعديل على اللعبة ارفع رقم VERSION ليُحذف الحفظ القديم عند اللاعبين. */
-const VERSION = 'v9';
+const VERSION = 'v10';
 const CACHE = 'beitna-' + VERSION;
 const CORE = [
   './', 'index.html', 'style.css', 'game.js', 'manifest.webmanifest',
